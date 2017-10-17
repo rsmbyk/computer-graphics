@@ -1,11 +1,11 @@
-#include <cstdlib>
-#include <cstdio>
 #include <GL/glew.h>
 #include <glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <common/shader.hpp>
 #include <common/controls.hpp>
+#include <common/shader.hpp>
+#include <cstdlib>
+#include <cstdio>
 #include <ctime>
 
 using namespace glm;
@@ -44,14 +44,14 @@ int main () {
     }
     
     glfwSetInputMode (window, GLFW_STICKY_KEYS, GL_TRUE);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwPollEvents();
-    glfwSetCursorPos(window, 1024/2, 768/2);
-    glClearColor (0.0f, 0.0f, 0.8f, 0.0f);
+    glfwSetInputMode (window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwPollEvents ();
+    glfwSetCursorPos (window, 1024/2, 768/2);
+    glClearColor (0.4f, 0.6f, 0.9f, 0.0f);
     
     glEnable (GL_DEPTH_TEST);
     glDepthFunc (GL_LESS);
-    glEnable(GL_CULL_FACE);
+    glEnable (GL_CULL_FACE);
     
     GLuint VertexArrayID;
     glGenVertexArrays (1, &VertexArrayID);
@@ -162,10 +162,10 @@ int main () {
         glUseProgram (programID);
     
         // Compute the MVP matrix from keyboard and mouse input
-        computeMatricesFromInputs();
-        glm::mat4 ProjectionMatrix = getProjectionMatrix();
-        glm::mat4 ViewMatrix = getViewMatrix();
-        glm::mat4 ModelMatrix = glm::mat4(1.0);
+        computeMatricesFromInputs ();
+        glm::mat4 ProjectionMatrix = getProjectionMatrix ();
+        glm::mat4 ViewMatrix = getViewMatrix ();
+        glm::mat4 ModelMatrix = glm::mat4 (1.0);
         glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
         
         glUniformMatrix4fv (MatrixID, 1, GL_FALSE, &MVP[0][0]);
@@ -199,4 +199,3 @@ int main () {
     
     return 0;
 }
-

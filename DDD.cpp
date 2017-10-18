@@ -53,15 +53,15 @@ int main () {
     glDepthFunc (GL_LESS);
     glEnable (GL_CULL_FACE);
     
-    GLuint VertexArrayID;
-    glGenVertexArrays (1, &VertexArrayID);
-    glBindVertexArray (VertexArrayID);
+    GLuint cubeVertexArrayID;
+    glGenVertexArrays (1, &cubeVertexArrayID);
+    glBindVertexArray (cubeVertexArrayID);
     
     GLuint programID = LoadShaders ("TransformVertexShader.vertexshader", "ColorFragmentShader.fragmentshader");
     GLuint MatrixID = glGetUniformLocation (programID, "MVP");
     
     // vertex list to draw the cube
-    static GLfloat g_vertex_buffer_data[] = {
+    static GLfloat cube_buffer[] = {
         // left
         -1.0f, -1.0f, -1.0f,
         -1.0f, -1.0f,  1.0f,
@@ -112,7 +112,7 @@ int main () {
     };
     
     // One color for each side. Generate random for each execution
-    static GLfloat g_color_buffer_data[6*6*3];
+    static GLfloat colorBuffer[6*6*3];
     srand (static_cast <unsigned> (time (0)));
     for (int v = 0; v < 6; v++) {
         GLfloat r, g, b;
@@ -120,21 +120,21 @@ int main () {
         g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
         b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
         for (int u = 0; u < 6; u++) {
-            g_color_buffer_data[18*v+3*u+0] = r;
-            g_color_buffer_data[18*v+3*u+1] = g;
-            g_color_buffer_data[18*v+3*u+2] = b;
+            colorBuffer[18*v+3*u+0] = r;
+            colorBuffer[18*v+3*u+1] = g;
+            colorBuffer[18*v+3*u+2] = b;
         }
     }
     
-    GLuint vertexbuffer;
-    glGenBuffers (1, &vertexbuffer);
-    glBindBuffer (GL_ARRAY_BUFFER, vertexbuffer);
-    glBufferData (GL_ARRAY_BUFFER, sizeof (g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+    GLuint cubeBufferID;
+    glGenBuffers (1, &cubeBufferID);
+    glBindBuffer (GL_ARRAY_BUFFER, cubeBufferID);
+    glBufferData (GL_ARRAY_BUFFER, sizeof (cube_buffer), cube_buffer, GL_STATIC_DRAW);
     
-    GLuint colorbuffer;
-    glGenBuffers (1, &colorbuffer);
-    glBindBuffer (GL_ARRAY_BUFFER, colorbuffer);
-    glBufferData (GL_ARRAY_BUFFER, sizeof (g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
+    GLuint colorBufferID;
+    glGenBuffers (1, &colorBufferID);
+    glBindBuffer (GL_ARRAY_BUFFER, colorBufferID);
+    glBufferData (GL_ARRAY_BUFFER, sizeof (colorBuffer), colorBuffer, GL_STATIC_DRAW);
     
     int timer = 0;
     
@@ -150,13 +150,13 @@ int main () {
                 g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
                 b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
                 for (int u = 0; u < 6; u++) {
-                    g_color_buffer_data[18*v+3*u+0] = r;
-                    g_color_buffer_data[18*v+3*u+1] = g;
-                    g_color_buffer_data[18*v+3*u+2] = b;
+                    colorBuffer[18*v+3*u+0] = r;
+                    colorBuffer[18*v+3*u+1] = g;
+                    colorBuffer[18*v+3*u+2] = b;
                 }
             }
             
-            glBufferData (GL_ARRAY_BUFFER, sizeof (g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
+            glBufferData (GL_ARRAY_BUFFER, sizeof (colorBuffer), colorBuffer, GL_STATIC_DRAW);
         }
         
         glUseProgram (programID);
@@ -171,11 +171,11 @@ int main () {
         glUniformMatrix4fv (MatrixID, 1, GL_FALSE, &MVP[0][0]);
         
         glEnableVertexAttribArray (0);
-        glBindBuffer (GL_ARRAY_BUFFER, vertexbuffer);
+        glBindBuffer (GL_ARRAY_BUFFER, cubeBufferID);
         glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, (void*) 0);
         
         glEnableVertexAttribArray (1);
-        glBindBuffer (GL_ARRAY_BUFFER, colorbuffer);
+        glBindBuffer (GL_ARRAY_BUFFER, colorBufferID);
         glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE, 0, (void*) 0);
         
         glDrawArrays (GL_TRIANGLES, 0, 12*3);
@@ -189,10 +189,10 @@ int main () {
     while (glfwGetKey (window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose (window) == 0);
     
     // Cleanup VBO and shader
-    glDeleteBuffers (1, &vertexbuffer);
-    glDeleteBuffers (1, &colorbuffer);
+    glDeleteBuffers (1, &cubeBufferID);
+    glDeleteBuffers (1, &colorBufferID);
     glDeleteProgram (programID);
-    glDeleteVertexArrays (1, &VertexArrayID);
+    glDeleteVertexArrays (1, &cubeVertexArrayID);
     
     // Close OpenGL window and terminate GLFW
     glfwTerminate ();

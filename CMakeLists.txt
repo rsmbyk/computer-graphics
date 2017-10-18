@@ -41,6 +41,25 @@ add_definitions (
     -D_CRT_SECURE_NO_WARNINGS
 )
 
+set (CONTROLS_AND_SHADER
+    common/controls.cpp
+    common/controls.hpp
+    common/shader.cpp
+    common/shader.hpp
+    ColorFragmentShader.fragmentshader
+    TransformVertexShader.vertexshader
+)
+
+set (BASE_OPENGL
+    main.hpp
+    opengl.hpp
+    opengl.cpp
+)
+
+# Test
+add_executable (Test check_version.cpp)
+target_link_libraries (Test ${ALL_LIBS})
+
 
 # Tugas 1 (Shape)
 add_executable (circle circle.cpp)
@@ -51,19 +70,14 @@ add_executable (rumah rumah.cpp)
 target_link_libraries (rumah ${ALL_LIBS})
 
 # Tugas 3 (3D Object)
-add_executable (DDD DDD.cpp
-    common/shader.cpp
-    common/shader.hpp
-    common/controls.cpp
-    common/controls.hpp
-    ColorFragmentShader.fragmentshader
-    TransformVertexShader.vertexshader
-)
+add_executable (DDD DDD.cpp ${CONTROLS_AND_SHADER})
 target_link_libraries (DDD ${ALL_LIBS})
 
 # Tugas 4 (Rollercoaster)
-add_executable (rollercoaster rollercoaster.cpp)
-
-
-SOURCE_GROUP (common REGULAR_EXPRESSION ".*/common/.*")
-SOURCE_GROUP (shaders REGULAR_EXPRESSION ".*/.*shader$")
+add_executable (rollercoaster
+    rollercoaster.cpp
+    objects.hpp
+    #objects.cpp
+    ${CONTROLS_AND_SHADER}
+)
+target_link_libraries (rollercoaster ${ALL_LIBS})

@@ -1,16 +1,14 @@
 #include <GL/glut.h>
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
 
-const double PI = 3.141592653589793;
 int theta = 0;
 int blueHex = 0;
 int blueHexChangeSpeed = 4;
 
 void draw_circle (int r, int jumlah_titik, int x_center, int y_center) {
     glBegin (GL_POLYGON);
-    for (int i = 0; i <= 360; i++){
-        float sudut = i * (2 * PI / jumlah_titik);
+    for (int i = 0; i <= jumlah_titik; i++){
+        double sudut = i * (2 * M_PI / jumlah_titik);
         float x = x_center + r * cos (sudut);
         float y = y_center + r * sin (sudut);
         glVertex2f (x, y);
@@ -18,15 +16,18 @@ void draw_circle (int r, int jumlah_titik, int x_center, int y_center) {
     glEnd();
 }
 
-void renderScene (void) {
+void renderScene () {
     glClear (GL_COLOR_BUFFER_BIT);
     theta = (theta + 1) % 360;
     blueHex = (blueHex + blueHexChangeSpeed);
-    if (blueHex == 100 || blueHex == 0) blueHexChangeSpeed *= -1;
     
-    double rad = theta * PI / 180;
+    if (blueHex == 100 || blueHex == 0)
+        // reverse blue hex cycle direction
+        blueHexChangeSpeed *= -1;
+    
+    double rad = theta * M_PI / 180;
     glColor3f (1.0, 0.0, 0.0); // red
-    draw_circle (30, 70, 200 * cos (rad), sin (rad) * 200);
+    draw_circle (30, 100, 200 * cos (rad), sin (rad) * 200);
     glColor3f (0.0, 0.0, blueHex / 100.0); // blue
     draw_circle (100, 100, 0, 0);
     glFlush ();
@@ -43,7 +44,7 @@ void idle () {
 }
 
 void visible (int vis) {
-    glutIdleFunc (vis == GLUT_VISIBLE ? idle : NULL);
+    glutIdleFunc (vis == GLUT_VISIBLE ? idle : nullptr);
 }
 
 int main (int argc, char** argv) {

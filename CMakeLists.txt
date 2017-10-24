@@ -77,7 +77,7 @@ target_link_libraries (DDD ${ALL_LIBS})
 add_executable (rollercoaster
     rollercoaster.cpp
     objects.hpp
-    #objects.cpp
+    things.hpp
     ${CONTROLS_AND_SHADER}
 )
 target_link_libraries (rollercoaster ${ALL_LIBS})

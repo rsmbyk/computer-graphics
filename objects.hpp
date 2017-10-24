@@ -34,16 +34,23 @@ typedef struct _coord {
 typedef struct _color {
     GLfloat r, g, b;
     
-    _color (GLfloat r, GLfloat g, GLfloat b) {
-        this->r = r;
-        this->g = g;
-        this->b = b;
+    _color (GLfloat r, GLfloat g, GLfloat b, bool hex) {
+        if (hex) {
+            this->r = r / 255;
+            this->g = g / 255;
+            this->b = b / 255;
+        }
+        else {
+            this->r = r;
+            this->g = g;
+            this->b = b;
+        }
     }
     
     _color () {
-        r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-        g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-        b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        r = (GLfloat) rand() / (GLfloat) RAND_MAX;
+        g = (GLfloat) rand() / (GLfloat) RAND_MAX;
+        b = (GLfloat) rand() / (GLfloat) RAND_MAX;
     }
     
     void set (GLfloat r, GLfloat g, GLfloat b) {
@@ -205,12 +212,12 @@ protected:
 class Plane : public Box {
 public:
     Plane (GLfloat x, GLfloat y, GLfloat z, GLfloat size, Color color)
-    : Box (x-(size/2), x+(size/2), y, y+0.1f, z-(size/2), z+(size/2)) {
+    : Box (x-(size/2), x+(size/2), y-0.1f, y, z-(size/2), z+(size/2)) {
         setFaceColor (TOP, color);
     }
     
     Plane (GLfloat x, GLfloat y, GLfloat z, GLfloat size)
-    : Plane (x, y, z, size, Color (0.5, 0.3, 0.0)) {}
+    : Plane (x, y, z, size, Color (109, 88, 74, true)) {}
 };
 
 

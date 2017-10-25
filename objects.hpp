@@ -65,11 +65,15 @@ class Object {
 public:
     virtual void render () = 0;
     virtual void clean () = 0;
+    virtual void move (int coord, GLfloat amount) = 0;
+    static const int X=0, Y=1, Z=2;
 };
 
 
 class Box : public Object {
 public:
+    Box () : Box (-1, 1, -1, 1, -1, 1) {}
+    
     Box (GLfloat x1, GLfloat x2, GLfloat y1, GLfloat y2, GLfloat z1, GLfloat z2, bool shuffleColor = false) {
         // As we already knew in elementary school, a box has 8 vertices.
         // These vertices will be used to build buffer for the box
@@ -84,7 +88,7 @@ public:
         v[6].set (x2, y2, z1);
         v[7].set (x1, y2, z1);
         
-        GLfloat buffer[108] = {
+        buffer = new GLfloat[108] {
             // left
             v[3].x, v[3].y, v[3].z,
             v[0].x, v[0].y, v[0].z,
@@ -180,6 +184,13 @@ public:
         glDeleteBuffers (1, &cboID);
     }
     
+    void move (int coord, GLfloat amount) override {
+        for (int i = 0; i < 108; i+=3)
+            buffer[i+coord] += amount;
+        glBindBuffer (GL_ARRAY_BUFFER, vboID);
+        glBufferData (GL_ARRAY_BUFFER, 108*4, buffer, GL_STATIC_DRAW);
+    }
+    
     // Constants to represents each faces of the box.
     // The order of enum must follow vertex array
     // draw order.
@@ -204,6 +215,7 @@ public:
 protected:
     // colors array need to be defined as class attribute
     // so that it can be changed after initialization.
+    GLfloat *buffer {};
     GLfloat *colors {};
     GLuint vaoID {}, vboID {}, cboID {};
 };
@@ -211,6 +223,8 @@ protected:
 
 class Plane : public Box {
 public:
+    Plane () : Plane (0, 0, 0, 20) {}
+    
     Plane (GLfloat x, GLfloat y, GLfloat z, GLfloat size, Color color)
     : Box (x-(size/2), x+(size/2), y-0.1f, y, z-(size/2), z+(size/2)) {
         setFaceColor (TOP, color);
@@ -223,6 +237,8 @@ public:
 
 class Cube : public Box {
 public:
+    Cube () : Cube (0, 0, 0, 2) {}
+    
     Cube (GLfloat x, GLfloat y, GLfloat z, GLfloat size, bool shuffleColor = false)
     : Box (x-(size/2), x+(size/2), y, y+size, z-(size/2), z+(size/2), shuffleColor) {}
 };
@@ -230,6 +246,8 @@ public:
 
 class Prism : public Object {
 public:
+    Prism () : Prism (0, 0, 0, 5, 2, 4) {}
+    
     Prism (GLfloat x, GLfloat y, GLfloat z, int n, GLfloat size, GLfloat height, bool shuffleColor = false)
     : Prism (x, y, z, n, size, size, height, shuffleColor) {}
     
@@ -277,6 +295,18 @@ public:
         glDeleteVertexArrays (1, &sideaoID);
         glDeleteBuffers (1, &sideboID);
         glDeleteBuffers (1, &sidecboID);
+    }
+    
+    void move (int coord, GLfloat amount) override {
+        for (int i = 0; i < slice*9; i+=3)
+            base[i+coord] += amount, cover[i+coord] += amount,
+            side[i+coord] += amount, side[slice*9+i+coord] += amount;
+        glBindBuffer (GL_ARRAY_BUFFER, baseboID);
+        glBufferData (GL_ARRAY_BUFFER, slice*9*4, base, GL_STATIC_DRAW);
+        glBindBuffer (GL_ARRAY_BUFFER, coverboID);
+        glBufferData (GL_ARRAY_BUFFER, slice*9*4, cover, GL_STATIC_DRAW);
+        glBindBuffer (GL_ARRAY_BUFFER, baseboID);
+        glBufferData (GL_ARRAY_BUFFER, slice*18*4, side, GL_STATIC_DRAW);
     }
     
     Prism *setBaseColor (int slice, Color color) {
@@ -355,7 +385,10 @@ protected:
         if (n > 360) n = 360;
         slice = n;
         
-        GLfloat side[slice*18], base[slice*9], cover[slice*9];
+        side = new GLfloat[slice*18];
+        base = new GLfloat[slice*9];
+        cover = new GLfloat[slice*9];
+        
         GLfloat y1, y2;
         y1 = y;
         y2 = y + height;
@@ -407,19 +440,19 @@ protected:
         glBindVertexArray (baseaoID);
         glGenBuffers (1, &baseboID);
         glBindBuffer (GL_ARRAY_BUFFER, baseboID);
-        glBufferData (GL_ARRAY_BUFFER, sizeof (base), base, GL_STATIC_DRAW);
+        glBufferData (GL_ARRAY_BUFFER, slice*9*4, base, GL_STATIC_DRAW);
         
         glGenVertexArrays (1, &coveraoID);
         glBindVertexArray (coveraoID);
         glGenBuffers (1, &coverboID);
         glBindBuffer (GL_ARRAY_BUFFER, coverboID);
-        glBufferData (GL_ARRAY_BUFFER, sizeof (cover), cover, GL_STATIC_DRAW);
+        glBufferData (GL_ARRAY_BUFFER, slice*9*4, cover, GL_STATIC_DRAW);
         
         glGenVertexArrays (1, &sideaoID);
         glBindVertexArray (sideaoID);
         glGenBuffers (1, &sideboID);
         glBindBuffer (GL_ARRAY_BUFFER, sideboID);
-        glBufferData (GL_ARRAY_BUFFER, sizeof (side), side, GL_STATIC_DRAW);
+        glBufferData (GL_ARRAY_BUFFER, slice*18*4, side, GL_STATIC_DRAW);
         
         baseColor = new GLfloat[slice*9];
         coverColor = new GLfloat[slice*9];
@@ -456,6 +489,7 @@ private:
            coveraoID {}, coverboID {}, covercboID {},
            sideaoID {}, sideboID {}, sidecboID {};
     
+    GLfloat *side, *base, *cover;
     GLfloat *baseColor, *coverColor, *sideColor;
     int slice;
 };
@@ -464,6 +498,8 @@ private:
 // Cylinder is a prism with a lot of slice (n)
 class Cylinder : public Prism {
 public:
+    Cylinder () : Cylinder (0, 0, 0, 2, 4) {}
+    
     Cylinder (GLfloat x, GLfloat y, GLfloat z, GLfloat r, GLfloat height, bool shuffleColor = false)
     : Prism (x, y, z, 360, r, height, shuffleColor) {}
 };
@@ -472,6 +508,8 @@ public:
 // Pyramid is a prism with cover size of 0
 class Pyramid : public Prism {
 public:
+    Pyramid () : Pyramid (0, 0, 0, 4, 2, 3) {}
+    
     Pyramid (GLfloat x, GLfloat y, GLfloat z, int n, GLfloat size, GLfloat height, bool shuffleColor = false)
     : Prism (x, y, z, n, size, 0.0, height, shuffleColor) {}
 };
@@ -480,6 +518,8 @@ public:
 // Cone is a pyramid with a lot of n
 class Cone : public Pyramid {
 public:
+    Cone () : Cone (0, 0, 0, 2, 4) {}
+    
     Cone (GLfloat x, GLfloat y, GLfloat z, GLfloat r, GLfloat height, bool shuffleColor = false)
     : Pyramid (x, y, z, 360, r, height, shuffleColor) {}
 };

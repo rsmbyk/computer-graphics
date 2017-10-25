@@ -1,7 +1,25 @@
-#include "objects.hpp"
+#include "things.hpp"
 
 using namespace glm;
 GLFWwindow* window;
+
+GLfloat random (GLfloat min, GLfloat max) {
+    return min + (GLfloat) rand () / (GLfloat (RAND_MAX / (max-min)));
+}
+
+void generateRandomTree (int n, GLfloat height, GLfloat planeSize, std::vector<Object*> &objects) {
+    GLfloat space[] = {-planeSize/2, 5};
+    for (int i = 0; i < n; i++) {
+        GLfloat x, z;
+        x = random (-planeSize/2, planeSize/2);
+        
+        GLfloat s = space[rand () % 2];
+        z = random (s, s+(planeSize/2)-5);
+        
+        int size = 5 + rand () % (10-5+1);
+        objects.push_back (new Tree (x, height, z, size));
+    }
+}
 
 int initGL () {
     // initialize GLFW
@@ -18,7 +36,7 @@ int initGL () {
     glfwWindowHint (GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
     // Open a window and create its OpenGL context
-    window = glfwCreateWindow (1024, 768, "Rollercoaster", nullptr, nullptr);
+    window = glfwCreateWindow (800, 600, "Rollercoaster", nullptr, nullptr);
     if (window == nullptr) {
         getchar ();
         glfwTerminate ();
@@ -48,6 +66,7 @@ int initGL () {
 }
 
 int main () {
+    srand (static_cast <unsigned> (time (0)));
     if (initGL () == -1)
         return -1;
     
@@ -55,30 +74,41 @@ int main () {
     GLuint MatrixID = glGetUniformLocation (programID, "MVP");
     
     /* define all the objects here. */
-    std::vector<Object*> objets;
-    objets.push_back (new Cube (5, 0, 0, 2));
-    objets.push_back (new Cube (3.6,0.75, 0, 0.45));
-    objets.push_back (new Cube (3.8,0.75, 0, 0.45));
-    objets.push_back (new Cube (0, 0, 0, 2));
-    objets.push_back (new Cube (1.1,0.75, 0, 0.45));
-    objets.push_back (new Cube (1.3,0.75, 0, 0.45));
-    objets.push_back (new Cube (2.5, 0, 0, 2));
-    objets.push_back (new Cube (-1.1,0.75, 0, 0.45));
-    objets.push_back (new Cube (-1.3,0.75, 0, 0.45));
-    objets.push_back (new Cube (-2.5, 0, 0, 2));
-    objets.push_back (new Box (-4.5,-3, 0, 1,-0.9,0.9));
-    Box *rel = new Box (-7,7, -0.25, 0,-1,1);
-    rel->setSideColor (Box::TOP, 0.5, 0.5, 0.5);
-    rel->setSideColor (Box::BOTTOM, 0.5, 0.5, 0.5);
-    rel->setSideColor (Box::LEFT, 0.5, 0.5, 0.5);
-    rel->setSideColor (Box::RIGHT, 0.5, 0.5, 0.5);
-    rel->setSideColor (Box::FRONT, 0.5, 0.5, 0.5);
-    rel->setSideColor (Box::REAR, 0.5, 0.5, 0.5);
-    objets.push_back ((Object*) rel);
-    objets.push_back (new Plane (0, -0.25, 0, 50));
-    objets.push_back (new Cylinder (-2.5, 2, 0, 0.5,1, 100));
+    std::vector<Object*> objects;
+    
+//    objects.push_back (new Cube (5, 0, 0, 2, true));
+//    objects.push_back (new Cube (3.6,0.75, 0, 0.45, true));
+//    objects.push_back (new Cube (3.8,0.75, 0, 0.45, true));
+//    objects.push_back (new Cube (0, 0, 0, 2, true));
+//    objects.push_back (new Cube (1.1,0.75, 0, 0.45, true));
+//    objects.push_back (new Cube (1.3,0.75, 0, 0.45, true));
+//    objects.push_back (new Cube (2.5, 0, 0, 2, true));
+//    objects.push_back (new Cube (-1.1,0.75, 0, 0.45, true));
+//    objects.push_back (new Cube (-1.3,0.75, 0, 0.45, true));
+//    objects.push_back (new Cube (-2.5, 0, 0, 2, true));
+//    objects.push_back (new Box (-4.5,-3, 0, 1,-0.9,0.9, true));
+//    objects.push_back ((new Prism (-2.5, 2, 0, 6, 1.0, 3.0, true))->setColor (0, Color ()));
+    
+    // kereta
+    auto *train = new Train (0, 0, 0, 10, 5);
+    objects.push_back ((Object*) train);
+    
+    // sample tree, drawn next to the train
+    objects.push_back (new Tree (0, 0, 2, 2));
+    
+    // earth
+    objects.push_back (new Plane (0, -0.25f, 0, 50));
+    
+    // rail
+    objects.push_back ((new Box (-25, 25, -0.25f, 0, -1, 1))
+                           ->setFaceColor (Color (64, 64, 64, 1))
+                           ->setFaceColor (Box::TOP, Color (80, 80, 80, 1)));
+    generateRandomTree (50, -0.25f, 50.0f, objects);
     
     do {
+        // move the train along x coordinate
+        train->move (Object::X, -0.01f);
+        
         glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         glUseProgram (programID);
@@ -91,17 +121,17 @@ int main () {
         glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
         
         glUniformMatrix4fv (MatrixID, 1, GL_FALSE, &MVP[0][0]);
-        for (int i = 0; i < objets.size (); i++)
+        for (int i = 0; i < objects.size (); i++)
             // render all objects defined
-            objets[i]->render ();
+            objects[i]->render ();
         
         glfwSwapBuffers (window);
         glfwPollEvents ();
     }
     while (glfwGetKey (window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose (window) == 0);
     
-    for (int i = 0; i < objets.size (); i++)
-        objets[i]->clean ();
+    for (int i = 0; i < objects.size (); i++)
+        objects[i]->clean ();
     glDeleteProgram (programID);
     
     // Close OpenGL window and terminate GLFW

@@ -1,6 +1,14 @@
-#include "things.hpp"
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
+#include <vector>
+#include <GL/glew.h>
+#include <glfw3.h>
+#include <common/controls.hpp>
+#include <common/shader.hpp>
+#include <customs/shapes.hpp>
+#include <customs/things.hpp>
 
-using namespace glm;
 GLFWwindow* window;
 
 GLfloat random (GLfloat min, GLfloat max) {
@@ -71,7 +79,7 @@ int main () {
         return -1;
     
     GLuint programID = LoadShaders ("TransformVertexShader.vertexshader", "ColorFragmentShader.fragmentshader");
-    GLuint MatrixID = glGetUniformLocation (programID, "MVP");
+    GLint MatrixID = glGetUniformLocation (programID, "MVP");
     
     /* define all the objects here. */
     std::vector<Object*> objects;
@@ -100,12 +108,15 @@ int main () {
     objects.push_back (new Plane (0, -0.25f, 0, 50));
     
     // rail
-    objects.push_back ((new Box (-25, 25, -0.25f, 0, -1, 1))
-                           ->setFaceColor (Color (64, 64, 64, 1))
-                           ->setFaceColor (Box::TOP, Color (80, 80, 80, 1)));
+    auto *rail = new Box (-25, 25, -0.25f, 0, -1, 1);
+    for (int i = 0; i < 6; i++)
+        rail->setFaceColor (i, Color (64, 64, 64, true));
+    rail->setFaceColor (Box::TOP, Color (80, 80, 80, true));
+    objects.push_back ((Object*) rail);
+    
     generateRandomTree (50, -0.25f, 50.0f, objects);
     
-    do {
+    while (glfwGetKey (window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose (window) == 0) {
         // move the train along x coordinate
         train->move (Object::X, -0.01f);
         
@@ -119,8 +130,8 @@ int main () {
         glm::mat4 ViewMatrix = getViewMatrix ();
         glm::mat4 ModelMatrix = glm::mat4 (1.0);
         glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
-        
         glUniformMatrix4fv (MatrixID, 1, GL_FALSE, &MVP[0][0]);
+        
         for (int i = 0; i < objects.size (); i++)
             // render all objects defined
             objects[i]->render ();
@@ -128,7 +139,6 @@ int main () {
         glfwSwapBuffers (window);
         glfwPollEvents ();
     }
-    while (glfwGetKey (window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose (window) == 0);
     
     for (int i = 0; i < objects.size (); i++)
         objects[i]->clean ();

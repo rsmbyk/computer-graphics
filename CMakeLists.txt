@@ -56,10 +56,11 @@ set (BASE_OPENGL
     opengl.cpp
 )
 
+file (GLOB_RECURSE OPENGL_OBJECTS "customs/*")
+
 # Test
 add_executable (Test check_version.cpp)
 target_link_libraries (Test ${ALL_LIBS})
-
 
 # Tugas 1 (Shape)
 add_executable (circle circle.cpp)
@@ -76,8 +77,7 @@ target_link_libraries (DDD ${ALL_LIBS})
 # Tugas 4 (Rollercoaster)
 add_executable (rollercoaster
     rollercoaster.cpp
-    objects.hpp
-    things.hpp
+    ${OPENGL_OBJECTS}
     ${CONTROLS_AND_SHADER}
 )
 target_link_libraries (rollercoaster ${ALL_LIBS})

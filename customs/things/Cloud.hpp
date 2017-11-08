@@ -1,0 +1,8 @@
+#ifndef COMPUTER_GRAPHICS_CLOUD_HPP
+#define COMPUTER_GRAPHICS_CLOUD_HPP
+
+class Cloud {
+
+};
+
+#endif // COMPUTER_GRAPHICS_CLOUD_HPP

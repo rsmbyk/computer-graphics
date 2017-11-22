@@ -6,6 +6,8 @@
 #include <customs/base/Color.hpp>
 #include <glm/glm.hpp>
 
+using namespace glm;
+
 class Box : public Object {
 public:
     explicit Box (bool shuffleColor = false);
@@ -13,9 +15,8 @@ public:
     
     void render () override;
     void clean () override;
-    void move (int coord, GLfloat amount) override;
-    void rotate (GLfloat x, GLfloat y, GLfloat z) override;
-    void scale (GLfloat x, GLfloat y, GLfloat z) override;
+    void transform (mat4 T, int type) override;
+    void measure () override;
     
     Box *setFaceColor (int face, Color color);
     

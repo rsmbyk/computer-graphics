@@ -4,6 +4,8 @@
 #include <glm/gtx/quaternion.hpp>
 #include <GL/gl.h>
 
+using namespace glm;
+
 /**
  * !!! IMPORTANT NOTES !!!
  *
@@ -12,31 +14,29 @@
  * w == 0 --> vec4 is a direction.
  */
 
-const glm::mat4 TRANSLATION_MATRIX = {
+const mat4 TRANSLATION_MATRIX = {
     1, 0, 0, 0, // 1, 0, 0, x,
     0, 1, 0, 0, // 0, 1, 0, y,
     0, 0, 1, 0, // 0, 0, 1, z,
     0, 0, 0, 1  // 0, 0, 0, 1
 };
 
-const glm::mat4 SCALING_MATRIX = {
+const mat4 SCALING_MATRIX = {
     0, 0, 0, 0, // x, 0, 0, 0,
     0, 0, 0, 0, // 0, y, 0, 0,
     0, 0, 0, 0, // 0, 0, z, 0,
     0, 0, 0, 1  // 0, 0, 0, 1
 };
 
-const glm::mat4 IDENTITY_MATRIX = {
+const mat4 IDENTITY_MATRIX = {
     1, 0, 0, 0, // 1, 0, 0, 0,
     0, 1, 0, 0, // 0, 1, 0, 0,
     0, 0, 1, 0, // 0, 0, 1, 0,
     0, 0, 0, 1  // 0, 0, 0, 1
 };
 
-glm::mat4 build_translation_matrix (GLfloat *arr);
-glm::mat4 build_translation_matrix (GLfloat x, GLfloat y, GLfloat z);
-glm::mat4 build_scaling_matrix (GLfloat *arr);
-glm::mat4 build_scaling_matrix (GLfloat x, GLfloat y, GLfloat z);
-glm::mat4 build_rotation_matrix (GLfloat x, GLfloat y, GLfloat z);
+mat4 translation_matrix (GLfloat x, GLfloat y, GLfloat z);
+mat4 scaling_matrix (GLfloat x, GLfloat y, GLfloat z);
+mat4 rotation_matrix (GLfloat x, GLfloat y, GLfloat z);
 
 #endif // COMPUTER_GRAPHICS_TRANFORM_MATRIX_HPP

@@ -4,16 +4,17 @@
 #include <vector>
 #include <customs/base/Object.hpp>
 
-class ComplexObject : public Object {
+using namespace glm;
+
+class Thing : public Object {
 public:
-    ComplexObject ();
+    Thing ();
     void add (Object *object);
     
     void render () override;
     void clean () override;
-    void move (int coord, GLfloat amount) override;
-    void rotate (GLfloat x, GLfloat y, GLfloat z) override;
-    void scale (GLfloat x, GLfloat y, GLfloat z) override;
+    void transform (mat4 T, int type) override;
+    void measure () override;
 
 private:
     std::vector<Object*> objects {};

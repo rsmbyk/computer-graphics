@@ -1,4 +1,5 @@
 #include <GL/glew.h>
+#include <algorithm>
 #include "Box.hpp"
 
 Box::Box (bool shuffleColor)
@@ -94,6 +95,8 @@ Box::Box (GLfloat x1, GLfloat x2, GLfloat y1, GLfloat y2, GLfloat z1, GLfloat z2
     if (shuffleColor)
         for (int i = 0; i < 6; i++)
             setFaceColor (i, Color (true));
+    
+    _measure ();
 }
 
 void Box::render () {
@@ -128,19 +131,25 @@ Box *Box::setFaceColor (int face, Color color) {
     return this;
 }
 
-void Box::move (int axis, GLfloat amount) {
-    for (int i = 0; i < BUFFER_LENGTH; i+=3)
-        buffer[i+axis] += amount;
+void Box::transform (mat4 T, int type) {
+    for (int i = 0; i < BUFFER_LENGTH; i += 3) {
+        vec4 res = T * vec4 {buffer[i], buffer[i+1], buffer[1+2], 1};
+        for (int j = 0; j < 3; j++)
+            buffer[i+j] = res[j];
+    }
+    
     glBindBuffer (GL_ARRAY_BUFFER, vboID);
     glBufferData (GL_ARRAY_BUFFER, BUFFER_LENGTH*sizeof (GLfloat*), buffer, GL_STATIC_DRAW);
 }
 
-void Box::rotate (GLfloat x, GLfloat y, GLfloat z) {
-
+void Box::measure () {
+    using std::min;
+    using std::max;
+    
+    for (int i = 0; i < BUFFER_LENGTH; i += 3) {
+        for (int j = 0; j < 3; j++) {
+            margin[j][0] = min (margin[j][0], buffer[i+j]);
+            margin[j][1] = max (margin[j][1], buffer[i+j]);
+        }
+    }
 }
-
-void Box::scale (GLfloat x, GLfloat y, GLfloat z) {
-
-}
-
-

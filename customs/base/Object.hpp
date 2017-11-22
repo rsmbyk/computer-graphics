@@ -2,6 +2,9 @@
 #define COMPUTER_GRAPHICS_OBJECT_HPP
 
 #include <GL/gl.h>
+#include <glm/detail/type_mat4x4.hpp>
+
+using namespace glm;
 
 /**
  * + ao = array object
@@ -23,14 +26,21 @@ public:
     
     virtual void render () = 0;
     virtual void clean () = 0;
-    virtual void move (int axis, GLfloat amount) = 0;
-    virtual void rotate (GLfloat x, GLfloat y, GLfloat z) = 0;
-    virtual void scale (GLfloat x, GLfloat y, GLfloat z) = 0;
+    virtual void transform (mat4 T, int type) = 0;
+    virtual void measure () = 0;
+    void _transform (mat4 T, int type);
+    void _measure ();
+    void _measureCenter ();
+    void move (GLfloat x, GLfloat y, GLfloat z);
+    void rotate (GLfloat x, GLfloat y, GLfloat z);
+    void scale (GLfloat x, GLfloat y, GLfloat z);
     
     // axis constants
     static const int X=0, Y=1, Z=2;
-
-protected:
+    
+    // transform constants
+    static const int TRANSLATE=0, ROTATE=1, SCALE=2;
+    
     GLfloat center[3], margin[3][2];
 };
 

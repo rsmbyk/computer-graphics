@@ -1,10 +1,12 @@
 #include <cstdlib>
 #include "Color.hpp"
 
+#define randOrZero (shuffleColor ? (GLfloat) rand () / (GLfloat) RAND_MAX : 0) // NOLINT
+
 Color::Color (bool shuffleColor) {
-    r = shuffleColor ? (GLfloat) rand () / (GLfloat) RAND_MAX : 0;
-    g = shuffleColor ? (GLfloat) rand () / (GLfloat) RAND_MAX : 0;
-    b = shuffleColor ? (GLfloat) rand () / (GLfloat) RAND_MAX : 0;
+    r = randOrZero;
+    g = randOrZero;
+    b = randOrZero;
 }
 
 Color::Color (GLfloat r, GLfloat g, GLfloat b, bool hex) {

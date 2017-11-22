@@ -2,6 +2,7 @@
 #include <cmath>
 #include <GL/glew.h>
 #include <customs/base/Coord.hpp>
+#include <cstdio>
 #include "Prism.hpp"
 
 Prism::Prism (bool shuffleColor)
@@ -114,6 +115,8 @@ Prism::Prism (GLfloat x, GLfloat y, GLfloat z, int n, GLfloat baseSize, GLfloat 
         setCoverColor (Color (true));
         setSideColor (Color (true));
     }
+    
+    _measure ();
 }
 
 void Prism::render () {
@@ -230,24 +233,48 @@ Prism *Prism::setRainbowColor () {
     return this;
 }
 
-void Prism::move (int axis, GLfloat amount) {
-    for (int i = 0; i < slice*9; i+=3)
-        cover[i+axis] += amount,
-        base[i+axis] += amount,
-        side[i+axis] += amount,
-        side[slice*9+i+axis] += amount;
+void trans (mat4 T, GLfloat vect[], int type) {
+    vec4 res, v;
+    v[3] = 1;
+    for (int i = 0; i < 3; i++)
+        v[i] = vect[i];
+    res = v * T;
+    for (int i = 0; i < 3; i++)
+        printf ("%f ", vect[i]);
+    printf ("-> ");
+    for (int i = 0; i < 3; i++)
+        vect[i] = res[i];
+    for (int i = 0; i < 3; i++)
+        printf ("%f ", vect[i]);
+    printf (" -> %d\n", type);
+}
+
+void Prism::transform (mat4 T, int type) {
+    for (int i = 0; i < 9*slice; i += 3) {
+        trans (T, &cover[i], 0);
+        trans (T, &base[i], 1);
+        trans (T, &side[i], 2);
+        trans (T, &side[9*slice+i], 3);
+    }
+    
     glBindBuffer (GL_ARRAY_BUFFER, coverboID);
-    glBufferData (GL_ARRAY_BUFFER, slice*9*4, cover, GL_STATIC_DRAW);
+    glBufferData (GL_ARRAY_BUFFER, slice*9 * sizeof (GLfloat), cover, GL_STATIC_DRAW);
     glBindBuffer (GL_ARRAY_BUFFER, baseboID);
-    glBufferData (GL_ARRAY_BUFFER, slice*9*4, base, GL_STATIC_DRAW);
+    glBufferData (GL_ARRAY_BUFFER, slice*9 * sizeof (GLfloat), base, GL_STATIC_DRAW);
     glBindBuffer (GL_ARRAY_BUFFER, baseboID);
-    glBufferData (GL_ARRAY_BUFFER, slice*18*4, side, GL_STATIC_DRAW);
+    glBufferData (GL_ARRAY_BUFFER, slice*18 * sizeof (GLfloat), side, GL_STATIC_DRAW);
 }
 
-void Prism::rotate (GLfloat x, GLfloat y, GLfloat z) {
-
-}
-
-void Prism::scale (GLfloat x, GLfloat y, GLfloat z) {
-
+void Prism::measure () {
+    using std::min;
+    using std::max;
+    #define min5(a, b, c, d, e) min (a, min (b, min (c, min (d, e))))
+    #define max5(a, b, c, d, e) max (a, max (b, max (c, max (d, e))))
+    
+    for (int i = 0; i < 9*slice; i++) {
+        for (int j = 0; j < 3; j++) {
+            margin[j][0] = min5 (margin[j][0], cover[i+j], base[i+j], side[i+j], side[9*slice+i+j]);
+            margin[j][1] = max5 (margin[j][1], cover[i+j], base[i+j], side[i+j], side[9*slice+i+j]);
+        }
+    }
 }

@@ -4,6 +4,8 @@
 #include <customs/base/Color.hpp>
 #include <customs/base/Object.hpp>
 
+using namespace glm;
+
 class Prism : public Object {
 public:
     explicit Prism (bool shuffleColor = false);
@@ -11,9 +13,8 @@ public:
     
     void render () override;
     void clean () override;
-    void move (int axis, GLfloat amount) override;
-    void rotate (GLfloat x, GLfloat y, GLfloat z) override;
-    void scale (GLfloat x, GLfloat y, GLfloat z) override;
+    void transform (mat4 T, int type) override;
+    void measure () override;
     
     Prism *setBaseColor (int slice, Color color);
     Prism *setBaseColor (Color color);

@@ -19,19 +19,15 @@ void Thing::clean () {
 }
 
 void Thing::transform (mat4 T, int type) {
-    printf ("thing transform\n");
     for (Object *obj : objects)
         obj->_transform (T, type);
 }
 
 void Thing::measure () {
-    using std::min;
-    using std::max;
-    
     for (Object *obj : objects) {
         for (int i = 0; i < 3; i++) {
-            margin[i][0] = min (margin[i][0], obj->margin[i][0]);
-            margin[i][1] = max (margin[i][1], obj->margin[i][1]);
+            margin[i][0] = std::min (margin[i][0], obj->margin[i][0]);
+            margin[i][1] = std::max (margin[i][1], obj->margin[i][1]);
         }
     }
 }

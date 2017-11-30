@@ -8,7 +8,7 @@ using namespace glm;
 
 class Prism : public Object {
 public:
-    explicit Prism (bool shuffleColor = false);
+    Prism ();
     Prism (GLfloat x, GLfloat y, GLfloat z, int n, GLfloat size, GLfloat height, bool shuffleColor = false);
     
     void render () override;
@@ -29,13 +29,14 @@ protected:
     Prism (GLfloat x, GLfloat y, GLfloat z, int n, GLfloat baseSize, GLfloat coverSize, GLfloat height, bool shuffleColor = false);
 
 private:
-    GLuint baseaoID {}, baseboID {}, basecboID {};
-    GLuint coveraoID {}, coverboID {}, covercboID {};
-    GLuint sideaoID {}, sideboID {}, sidecboID {};
+    GLuint coveraoID, coverboID, covercboID;
+    GLuint baseaoID, baseboID, basecboID;
+    GLuint sideaoID, sideboID, sidecboID;
     
-    GLfloat *side, *base, *cover;
-    GLfloat *baseColor, *coverColor, *sideColor;
-    int slice;
+    GLfloat *cover, *base, *side;
+    GLfloat *coverColor, *baseColor, *sideColor;
+    GLint slice;
+    GLint EDGE_LENGTH, EDGE_SIZE, SIDE_LENGTH, SIDE_SIZE;
 };
 
 #endif // COMPUTER_GRAPHICS_PRISM_HPP

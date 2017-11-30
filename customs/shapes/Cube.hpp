@@ -6,7 +6,7 @@
 
 class Cube : public Box {
 public:
-    explicit Cube (bool shuffleColor = false);
+    Cube ();
     Cube (GLfloat x, GLfloat y, GLfloat z, GLfloat size, bool shuffleColor = false);
 };
 

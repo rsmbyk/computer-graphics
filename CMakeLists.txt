@@ -80,4 +80,14 @@ add_executable (rollercoaster
     ${OPENGL_OBJECTS}
     ${CONTROLS_AND_SHADER}
 )
+
 target_link_libraries (rollercoaster ${ALL_LIBS})
+
+# Tugas 5 (KubusMutar)
+add_executable (kubusmutar
+    kubusmutar.cpp
+    ${OPENGL_OBJECTS}
+    ${CONTROLS_AND_SHADER}
+)
+
+target_link_libraries (kubusmutar ${ALL_LIBS})

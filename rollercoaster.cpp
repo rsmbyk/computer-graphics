@@ -8,6 +8,7 @@
 #include <common/shader.hpp>
 #include <customs/shapes.hpp>
 #include <customs/things.hpp>
+#include <customs/utils/tranform_matrix.hpp>
 
 GLFWwindow* window;
 
@@ -98,30 +99,59 @@ int main () {
 //    objects.push_back ((new Prism (-2.5, 2, 0, 6, 1.0, 3.0, true))->setColor (0, Color ()));
     
     // kereta
-    auto *train = new Train (0, 0, 0, 10, 5);
-    objects.push_back ((Object*) train);
+//    auto *train = new Train (0, 0, 0, 10, 5);
+//    objects.push_back ((Object*) train);
     
     // sample tree, drawn next to the train
-    objects.push_back (new Tree (0, 0, 2, 2));
-    
-    // earth
-    objects.push_back (new Plane (0, -0.25f, 0, 50));
-    
-    // rail
-    auto *rail = new Box (-25, 25, -0.25f, 0, -1, 1);
-    for (int i = 0; i < 6; i++)
-        rail->setFaceColor (i, Color (64, 64, 64, true));
-    rail->setFaceColor (Box::TOP, Color (80, 80, 80, true));
-    objects.push_back ((Object*) rail);
-    
+//    auto tree = new Tree (0, 0, 2, 2);
+//    objects.push_back ((Object*) tree);
+//
+//    // earth
+//    objects.push_back (new Plane (0, -0.25f, 0, 50));
+//
+//    // rail
+//    auto *rail = new Box (-25, 25, -0.25f, 0, -1, 1);
+//    for (int i = 0; i < 6; i++)
+//        rail->setFaceColor (i, Color (64, 64, 64, true));
+//    rail->setFaceColor (TOP, Color (80, 80, 80, true));
+//    objects.push_back ((Object*) rail);
+//
     generateRandomTree (50, -0.25f, 50.0f, objects);
+    Cube cube (-5, 2, 0, 4, true);
+    Prism prism (10, 2, -10, 6, 2, 4, true);
+    Cone cone (8, -6, 0, 2, 4, true);
+    Pyramid pyramid (2, 5, 0, 4, 2, 4, true);
+    Cylinder cylinder (-20, -20, 20, 2.5, 4, true);
+    
+    Tree tree (0, -0.8f, 0, 4);
+
+    objects.push_back (&cube);
+    objects.push_back (&cone);
+    objects.push_back (&pyramid);
+    objects.push_back (&cylinder);
+    objects.push_back (&prism);
+    objects.push_back (new Car (6, 2, 6, 4));
+    objects.push_back (&tree);
+    objects.push_back (new Sphere (0, 5, 0, 3));
+    objects.push_back (new Sun (0, 100));
+    objects.push_back (new Plane (0, 0, 0, 100));
+    // axis
+    objects.push_back (new Box (-100, 100, -0.01f, 0.01f, -0.01f, 0.01f, true));
+    objects.push_back (new Box (-0.01f, 0.01f, -100, 100, -0.01f, 0.01f, true));
+    objects.push_back (new Box (-0.01f, 0.01f, -0.01f, 0.01f, -100, 100, true));
+    
+    objects.push_back (new Train (0, 0, 0, 4, 3.5));
     
     while (glfwGetKey (window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose (window) == 0) {
-        // move the train along x coordinate
-        train->move (Object::X, -0.01f);
-        
+        cube.orbit (1, 0, 0, 0, 0, 0);
+        cone.orbit (-1, 0, 0, 0, 0, 0);
+        pyramid.rotate (0, 1, 0);
+        cylinder.translate (0.02f, 0.02f, -0.02f);
+        prism.scale (0.0005f, 0.001f, 0);
+        tree.translate (0.005f, 0, 0);
+        tree.rotate (2, 0, 0);
         glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
+    
         glUseProgram (programID);
         
         // Compute the MVP matrix from keyboard and mouse input

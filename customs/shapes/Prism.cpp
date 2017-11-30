@@ -1,12 +1,14 @@
 #include <algorithm>
 #include <cmath>
 #include <GL/glew.h>
-#include <customs/base/Coord.hpp>
 #include <cstdio>
+#include <glm/vec3.hpp>
 #include "Prism.hpp"
 
-Prism::Prism (bool shuffleColor)
-: Prism (0, 0, 0, 5, 2, 4, shuffleColor) {}
+using namespace glm;
+
+Prism::Prism ()
+: Prism (0, 0, 0, 5, 2, 4, true) {}
 
 Prism::Prism (GLfloat x, GLfloat y, GLfloat z, int n, GLfloat size, GLfloat height, bool shuffleColor)
 : Prism (x, y, z, n, size, size, height, shuffleColor) {}
@@ -17,10 +19,14 @@ Prism::Prism (GLfloat x, GLfloat y, GLfloat z, int n, GLfloat baseSize, GLfloat 
 : Object (x-maxSize, x+maxSize, y, y+height, z-maxSize, z+maxSize) {
     if (n > 360) n = 360;
     slice = n;
+    EDGE_LENGTH = 9 * slice;
+    EDGE_SIZE = EDGE_LENGTH * sizeof (GLfloat);
+    SIDE_LENGTH = 18 * slice;
+    SIDE_SIZE = SIDE_LENGTH * sizeof (GLfloat);
     
-    side = new GLfloat[slice*18];
-    base = new GLfloat[slice*9];
-    cover = new GLfloat[slice*9];
+    cover = new GLfloat[EDGE_LENGTH];
+    base = new GLfloat[EDGE_LENGTH];
+    side = new GLfloat[SIDE_LENGTH];
     
     GLfloat y1, y2;
     y1 = y;
@@ -43,11 +49,11 @@ Prism::Prism (GLfloat x, GLfloat y, GLfloat z, int n, GLfloat baseSize, GLfloat 
         
         // 32
         // 01
-        Coord v[4];
-        v[0].set (x1, y1, z1);
-        v[1].set (x2, y1, z2);
-        v[2].set (x4, y2, z4);
-        v[3].set (x3, y2, z3);
+        vec3 v[4];
+        v[0] = vec3 (x1, y1, z1);
+        v[1] = vec3 (x2, y1, z2);
+        v[2] = vec3 (x4, y2, z4);
+        v[3] = vec3 (x3, y2, z3);
         
         GLfloat *s;
         s = &base[i*9];
@@ -69,46 +75,46 @@ Prism::Prism (GLfloat x, GLfloat y, GLfloat z, int n, GLfloat baseSize, GLfloat 
         s[15] = v[2].x, s[16] = v[2].y, s[17] = v[2].z;
     }
     
-    glGenVertexArrays (1, &baseaoID);
-    glBindVertexArray (baseaoID);
-    glGenBuffers (1, &baseboID);
-    glBindBuffer (GL_ARRAY_BUFFER, baseboID);
-    glBufferData (GL_ARRAY_BUFFER, slice*9*sizeof (GLfloat*), base, GL_STATIC_DRAW);
-    
     glGenVertexArrays (1, &coveraoID);
     glBindVertexArray (coveraoID);
     glGenBuffers (1, &coverboID);
     glBindBuffer (GL_ARRAY_BUFFER, coverboID);
-    glBufferData (GL_ARRAY_BUFFER, slice*9*sizeof (GLfloat*), cover, GL_STATIC_DRAW);
+    glBufferData (GL_ARRAY_BUFFER, EDGE_SIZE, cover, GL_STATIC_DRAW);
+    
+    glGenVertexArrays (1, &baseaoID);
+    glBindVertexArray (baseaoID);
+    glGenBuffers (1, &baseboID);
+    glBindBuffer (GL_ARRAY_BUFFER, baseboID);
+    glBufferData (GL_ARRAY_BUFFER, EDGE_SIZE, base, GL_STATIC_DRAW);
     
     glGenVertexArrays (1, &sideaoID);
     glBindVertexArray (sideaoID);
     glGenBuffers (1, &sideboID);
     glBindBuffer (GL_ARRAY_BUFFER, sideboID);
-    glBufferData (GL_ARRAY_BUFFER, slice*18*sizeof (GLfloat*), side, GL_STATIC_DRAW);
+    glBufferData (GL_ARRAY_BUFFER, SIDE_SIZE, side, GL_STATIC_DRAW);
     
-    baseColor = new GLfloat[slice*9];
-    coverColor = new GLfloat[slice*9];
-    sideColor = new GLfloat[slice*18];
+    coverColor = new GLfloat[EDGE_LENGTH];
+    baseColor = new GLfloat[EDGE_LENGTH];
+    sideColor = new GLfloat[SIDE_LENGTH];
     
-    for (int i = 0; i < slice*9; i++)
+    for (int i = 0; i < EDGE_LENGTH; i++)
         baseColor[i] = 0.0;
-    for (int i = 0; i < slice*9; i++)
+    for (int i = 0; i < EDGE_LENGTH; i++)
         coverColor[i] = 0.0;
-    for (int i = 0; i < slice*18; i++)
+    for (int i = 0; i < SIDE_LENGTH; i++)
         sideColor[i] = 0.0;
-    
-    glGenBuffers (1, &basecboID);
-    glBindBuffer (GL_ARRAY_BUFFER, basecboID);
-    glBufferData (GL_ARRAY_BUFFER, slice*9*sizeof (GLfloat*), baseColor, GL_STATIC_DRAW);
     
     glGenBuffers (1, &covercboID);
     glBindBuffer (GL_ARRAY_BUFFER, covercboID);
-    glBufferData (GL_ARRAY_BUFFER, slice*9*sizeof (GLfloat*), coverColor, GL_STATIC_DRAW);
+    glBufferData (GL_ARRAY_BUFFER, EDGE_SIZE, coverColor, GL_STATIC_DRAW);
+    
+    glGenBuffers (1, &basecboID);
+    glBindBuffer (GL_ARRAY_BUFFER, basecboID);
+    glBufferData (GL_ARRAY_BUFFER, EDGE_SIZE, baseColor, GL_STATIC_DRAW);
     
     glGenBuffers (1, &sidecboID);
     glBindBuffer (GL_ARRAY_BUFFER, sidecboID);
-    glBufferData (GL_ARRAY_BUFFER, slice*18*sizeof (GLfloat*), sideColor, GL_STATIC_DRAW);
+    glBufferData (GL_ARRAY_BUFFER, SIDE_SIZE, sideColor, GL_STATIC_DRAW);
     
     if (shuffleColor) {
         setBaseColor (Color (true));
@@ -121,20 +127,20 @@ Prism::Prism (GLfloat x, GLfloat y, GLfloat z, int n, GLfloat baseSize, GLfloat 
 
 void Prism::render () {
     glEnableVertexAttribArray (0);
-    glBindBuffer (GL_ARRAY_BUFFER, baseboID);
+    glBindBuffer (GL_ARRAY_BUFFER, coverboID);
     glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, (void*) 0); // NOLINT
     glEnableVertexAttribArray (1);
-    glBindBuffer (GL_ARRAY_BUFFER, basecboID);
+    glBindBuffer (GL_ARRAY_BUFFER, covercboID);
     glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE, 0, (void*) 0); // NOLINT
     glDrawArrays (GL_TRIANGLES, 0, slice*3);
     glDisableVertexAttribArray (0);
     glDisableVertexAttribArray (1);
     
     glEnableVertexAttribArray (0);
-    glBindBuffer (GL_ARRAY_BUFFER, coverboID);
+    glBindBuffer (GL_ARRAY_BUFFER, baseboID);
     glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, (void*) 0); // NOLINT
     glEnableVertexAttribArray (1);
-    glBindBuffer (GL_ARRAY_BUFFER, covercboID);
+    glBindBuffer (GL_ARRAY_BUFFER, basecboID);
     glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE, 0, (void*) 0); // NOLINT
     glDrawArrays (GL_TRIANGLES, 0, slice*3);
     glDisableVertexAttribArray (0);
@@ -152,17 +158,34 @@ void Prism::render () {
 }
 
 void Prism::clean () {
-    glDeleteVertexArrays (1, &baseaoID);
-    glDeleteBuffers (1, &baseboID);
-    glDeleteBuffers (1, &basecboID);
-    
     glDeleteVertexArrays (1, &coveraoID);
     glDeleteBuffers (1, &coverboID);
     glDeleteBuffers (1, &covercboID);
     
+    glDeleteVertexArrays (1, &baseaoID);
+    glDeleteBuffers (1, &baseboID);
+    glDeleteBuffers (1, &basecboID);
+    
     glDeleteVertexArrays (1, &sideaoID);
     glDeleteBuffers (1, &sideboID);
     glDeleteBuffers (1, &sidecboID);
+}
+
+Prism *Prism::setCoverColor (int slice, Color color) {
+    if (slice < this->slice)
+        for (int i = 0; i < 3; i++)
+            coverColor[slice*9+i*3+0] = color.r,
+            coverColor[slice*9+i*3+1] = color.g,
+            coverColor[slice*9+i*3+2] = color.b;
+    glBindBuffer (GL_ARRAY_BUFFER, covercboID);
+    glBufferData (GL_ARRAY_BUFFER, EDGE_SIZE, coverColor, GL_STATIC_DRAW);
+    return this;
+}
+
+Prism *Prism::setCoverColor (Color color) {
+    for (int i = 0; i < slice; i++)
+        setCoverColor (i, color);
+    return this;
 }
 
 Prism *Prism::setBaseColor (int slice, Color color) {
@@ -172,7 +195,7 @@ Prism *Prism::setBaseColor (int slice, Color color) {
             baseColor[slice*9+i*3+1] = color.g,
             baseColor[slice*9+i*3+2] = color.b;
         glBindBuffer (GL_ARRAY_BUFFER, basecboID);
-        glBufferData (GL_ARRAY_BUFFER, this->slice*9*4, baseColor, GL_STATIC_DRAW);
+        glBufferData (GL_ARRAY_BUFFER, EDGE_SIZE, baseColor, GL_STATIC_DRAW);
     }
     return this;
 }
@@ -183,23 +206,6 @@ Prism *Prism::setBaseColor (Color color) {
     return this;
 }
 
-Prism *Prism::setCoverColor (int slice, Color color) {
-    if (slice < this->slice)
-        for (int i = 0; i < 3; i++)
-            coverColor[slice*9+i*3+0] = color.r,
-            coverColor[slice*9+i*3+1] = color.g,
-            coverColor[slice*9+i*3+2] = color.b;
-    glBindBuffer (GL_ARRAY_BUFFER, covercboID);
-    glBufferData (GL_ARRAY_BUFFER, this->slice*9*4, coverColor, GL_STATIC_DRAW);
-    return this;
-}
-
-Prism *Prism::setCoverColor (Color color) {
-    for (int i = 0; i < slice; i++)
-        setCoverColor (i, color);
-    return this;
-}
-
 Prism *Prism::setSideColor (int slice, Color color) {
     if (0 <= slice && slice < this->slice) {
         for (int i = 0; i < 6; i++)
@@ -207,7 +213,7 @@ Prism *Prism::setSideColor (int slice, Color color) {
             sideColor[slice*18+i*3+1] = color.g,
             sideColor[slice*18+i*3+2] = color.b;
         glBindBuffer (GL_ARRAY_BUFFER, sidecboID);
-        glBufferData (GL_ARRAY_BUFFER, this->slice*18*4, sideColor, GL_STATIC_DRAW);
+        glBufferData (GL_ARRAY_BUFFER, SIDE_SIZE, sideColor, GL_STATIC_DRAW);
     }
     return this;
 }
@@ -233,36 +239,34 @@ Prism *Prism::setRainbowColor () {
     return this;
 }
 
-void trans (mat4 T, GLfloat vect[], int type) {
+void trans (mat4 T, GLfloat vect[]) {
     vec4 res, v;
     v[3] = 1;
     for (int i = 0; i < 3; i++)
         v[i] = vect[i];
     res = v * T;
     for (int i = 0; i < 3; i++)
-        printf ("%f ", vect[i]);
-    printf ("-> ");
-    for (int i = 0; i < 3; i++)
         vect[i] = res[i];
-    for (int i = 0; i < 3; i++)
-        printf ("%f ", vect[i]);
-    printf (" -> %d\n", type);
 }
 
 void Prism::transform (mat4 T, int type) {
+    GLfloat copy[EDGE_LENGTH];
+    for (int i = 0; i < EDGE_LENGTH; i++)
+        copy[i] = cover[i];
+    
     for (int i = 0; i < 9*slice; i += 3) {
-        trans (T, &cover[i], 0);
-        trans (T, &base[i], 1);
-        trans (T, &side[i], 2);
-        trans (T, &side[9*slice+i], 3);
+        trans (T, &cover[i]);
+        trans (T, &base[i]);
+        trans (T, &side[i]);
+        trans (T, &side[9*slice+i]);
     }
     
     glBindBuffer (GL_ARRAY_BUFFER, coverboID);
-    glBufferData (GL_ARRAY_BUFFER, slice*9 * sizeof (GLfloat), cover, GL_STATIC_DRAW);
+    glBufferData (GL_ARRAY_BUFFER, EDGE_SIZE, cover, GL_STATIC_DRAW);
     glBindBuffer (GL_ARRAY_BUFFER, baseboID);
-    glBufferData (GL_ARRAY_BUFFER, slice*9 * sizeof (GLfloat), base, GL_STATIC_DRAW);
-    glBindBuffer (GL_ARRAY_BUFFER, baseboID);
-    glBufferData (GL_ARRAY_BUFFER, slice*18 * sizeof (GLfloat), side, GL_STATIC_DRAW);
+    glBufferData (GL_ARRAY_BUFFER, EDGE_SIZE, base, GL_STATIC_DRAW);
+    glBindBuffer (GL_ARRAY_BUFFER, sideboID);
+    glBufferData (GL_ARRAY_BUFFER, SIDE_SIZE, side, GL_STATIC_DRAW);
 }
 
 void Prism::measure () {
@@ -271,7 +275,7 @@ void Prism::measure () {
     #define min5(a, b, c, d, e) min (a, min (b, min (c, min (d, e))))
     #define max5(a, b, c, d, e) max (a, max (b, max (c, max (d, e))))
     
-    for (int i = 0; i < 9*slice; i++) {
+    for (int i = 0; i < 9*slice; i += 3) {
         for (int j = 0; j < 3; j++) {
             margin[j][0] = min5 (margin[j][0], cover[i+j], base[i+j], side[i+j], side[9*slice+i+j]);
             margin[j][1] = max5 (margin[j][1], cover[i+j], base[i+j], side[i+j], side[9*slice+i+j]);

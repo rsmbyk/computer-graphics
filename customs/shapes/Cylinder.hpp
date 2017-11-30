@@ -6,7 +6,7 @@
 // Cylinder is a prism with a lot of slice (n)
 class Cylinder : public Prism {
 public:
-    explicit Cylinder (bool shuffleColor = false);
+    Cylinder ();
     Cylinder (GLfloat x, GLfloat y, GLfloat z, GLfloat r, GLfloat height, bool shuffleColor = false);
 };
 

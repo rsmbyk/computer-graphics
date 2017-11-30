@@ -15,4 +15,3 @@ Tree::Tree (GLfloat x, GLfloat y, GLfloat z, GLfloat r, GLfloat height) {
     add (&leaves);
     _measure ();
 }
-

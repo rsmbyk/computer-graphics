@@ -6,7 +6,7 @@
 // Cone is a pyramid with a lot of n
 class Cone : public Pyramid {
 public:
-    explicit Cone (bool shuffleColor = false);
+    Cone ();
     Cone (GLfloat x, GLfloat y, GLfloat z, GLfloat r, GLfloat height, bool shuffleColor = false);
 };
 

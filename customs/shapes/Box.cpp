@@ -2,23 +2,23 @@
 #include <algorithm>
 #include "Box.hpp"
 
-Box::Box (bool shuffleColor)
-: Box (-1, 1, -1, 1, -1, 1, shuffleColor) {}
+Box::Box ()
+: Box (-1, 1, -1, 1, -1, 1, true) {}
 
 Box::Box (GLfloat x1, GLfloat x2, GLfloat y1, GLfloat y2, GLfloat z1, GLfloat z2, bool shuffleColor)
 : Object (x1, x2, y1, y2, z1, z2) {
     // As we already knew in elementary school, a box has 8 vertices.
     // These vertices will be used to build buffer for the box
     // which use the same 8 vertices multiple times.
-    Coord v[8];
-    v[0].set (x1, y1, z2);
-    v[1].set (x2, y1, z2);
-    v[2].set (x2, y1, z1);
-    v[3].set (x1, y1, z1);
-    v[4].set (x1, y2, z2);
-    v[5].set (x2, y2, z2);
-    v[6].set (x2, y2, z1);
-    v[7].set (x1, y2, z1);
+    vec3 v[8];
+    v[0] = vec3 (x1, y1, z2);
+    v[1] = vec3 (x2, y1, z2);
+    v[2] = vec3 (x2, y1, z1);
+    v[3] = vec3 (x1, y1, z1);
+    v[4] = vec3 (x1, y2, z2);
+    v[5] = vec3 (x2, y2, z2);
+    v[6] = vec3 (x2, y2, z1);
+    v[7] = vec3 (x1, y2, z1);
     
     buffer = new GLfloat[BUFFER_LENGTH] {
         // left
@@ -74,7 +74,7 @@ Box::Box (GLfloat x1, GLfloat x2, GLfloat y1, GLfloat y2, GLfloat z1, GLfloat z2
     glBindVertexArray (vaoID);
     glGenBuffers (1, &vboID);
     glBindBuffer (GL_ARRAY_BUFFER, vboID);
-    glBufferData (GL_ARRAY_BUFFER, BUFFER_LENGTH*sizeof (GLfloat*), buffer, GL_STATIC_DRAW);
+    glBufferData (GL_ARRAY_BUFFER, BUFFER_SIZE, buffer, GL_STATIC_DRAW);
     
     // Initial color for all faces of the box is black.
     // It can be overridden by calling @setFaceColor method.
@@ -90,7 +90,7 @@ Box::Box (GLfloat x1, GLfloat x2, GLfloat y1, GLfloat y2, GLfloat z1, GLfloat z2
     //       type.
     glGenBuffers (1, &cboID);
     glBindBuffer (GL_ARRAY_BUFFER, cboID);
-    glBufferData (GL_ARRAY_BUFFER, BUFFER_LENGTH*sizeof (GLfloat*), colors, GL_STATIC_DRAW);
+    glBufferData (GL_ARRAY_BUFFER, BUFFER_SIZE, colors, GL_STATIC_DRAW);
     
     if (shuffleColor)
         for (int i = 0; i < 6; i++)
@@ -121,35 +121,36 @@ void Box::clean () {
     glDeleteBuffers (1, &cboID);
 }
 
-Box *Box::setFaceColor (int face, Color color) {
-    for (int i = 0; i < 6; i++)
-        colors[18*face+3*i+0] = color.r,
-        colors[18*face+3*i+1] = color.g,
-        colors[18*face+3*i+2] = color.b;
+void Box::setFaceColor (int face, Color color) {
+    for (int i = 0; i < 18; i += 3)
+        colors[18*face+i+0] = color.r,
+        colors[18*face+i+1] = color.g,
+        colors[18*face+i+2] = color.b;
     glBindBuffer (GL_ARRAY_BUFFER, cboID);
-    glBufferData (GL_ARRAY_BUFFER, BUFFER_LENGTH*sizeof (GLfloat*), colors, GL_STATIC_DRAW);
-    return this;
+    glBufferData (GL_ARRAY_BUFFER, BUFFER_SIZE, colors, GL_STATIC_DRAW);
+}
+
+void Box::setColor (Color color) {
+    for (int i = 0; i < 6; i += 3)
+        setFaceColor (i, color);
 }
 
 void Box::transform (mat4 T, int type) {
     for (int i = 0; i < BUFFER_LENGTH; i += 3) {
-        vec4 res = T * vec4 {buffer[i], buffer[i+1], buffer[1+2], 1};
+        vec4 res = vec4 (buffer[i], buffer[i+1], buffer[i+2], 1) * T;
         for (int j = 0; j < 3; j++)
             buffer[i+j] = res[j];
     }
     
     glBindBuffer (GL_ARRAY_BUFFER, vboID);
-    glBufferData (GL_ARRAY_BUFFER, BUFFER_LENGTH*sizeof (GLfloat*), buffer, GL_STATIC_DRAW);
+    glBufferData (GL_ARRAY_BUFFER, BUFFER_SIZE, buffer, GL_STATIC_DRAW);
 }
 
 void Box::measure () {
-    using std::min;
-    using std::max;
-    
     for (int i = 0; i < BUFFER_LENGTH; i += 3) {
         for (int j = 0; j < 3; j++) {
-            margin[j][0] = min (margin[j][0], buffer[i+j]);
-            margin[j][1] = max (margin[j][1], buffer[i+j]);
+            margin[j][0] = std::min (margin[j][0], buffer[i+j]);
+            margin[j][1] = std::max (margin[j][1], buffer[i+j]);
         }
     }
 }

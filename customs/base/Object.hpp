@@ -22,7 +22,7 @@ using namespace glm;
 
 class Object {
 public:
-    Object (GLfloat x1, GLfloat x2, GLfloat y1, GLfloat y2, GLfloat z1, GLfloat z2, GLfloat x = 0.5f, GLfloat y = 0.5f, GLfloat z = 0.5f);
+    Object (GLfloat x1, GLfloat x2, GLfloat y1, GLfloat y2, GLfloat z1, GLfloat z2);
     
     virtual void render () = 0;
     virtual void clean () = 0;
@@ -31,17 +31,28 @@ public:
     void _transform (mat4 T, int type);
     void _measure ();
     void _measureCenter ();
-    void move (GLfloat x, GLfloat y, GLfloat z);
+    void _measureMargin ();
+    void translate (GLfloat x, GLfloat y, GLfloat z);
     void rotate (GLfloat x, GLfloat y, GLfloat z);
+    void orbit (GLfloat x, GLfloat y, GLfloat z, GLfloat xCenter, GLfloat yCenter, GLfloat zCenter);
     void scale (GLfloat x, GLfloat y, GLfloat z);
+    void scaleTo (GLfloat x, GLfloat y, GLfloat z);
     
     // axis constants
-    static const int X=0, Y=1, Z=2;
+    // static const int X=0, Y=1, Z=2;
+    #define X 0
+    #define Y 1
+    #define Z 2
     
     // transform constants
-    static const int TRANSLATE=0, ROTATE=1, SCALE=2;
+    // static const int TRANSLATE=0, ROTATE=1, SCALE=2;
+    #define TRANSLATE 0
+    #define ROTATE 1
+    #define SCALE 2
     
     GLfloat center[3], margin[3][2];
+    GLfloat x, y, z;
+    GLfloat x1, x2, y1, y2, z1, z2;
 };
 
 #endif // COMPUTER_GRAPHICS_OBJECT_HPP

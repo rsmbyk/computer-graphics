@@ -3,17 +3,11 @@
 
 #include <customs/base/Object.hpp>
 #include <customs/base/Color.hpp>
-#include <glm/glm.hpp>
 
 class Box : public Object {
 public:
     Box ();
-    Box (GLfloat x1, GLfloat x2, GLfloat y1, GLfloat y2, GLfloat z1, GLfloat z2, bool shuffleColor = false);
-    
-    void render () override;
-    void clean () override;
-    void transform (mat4 T, int type) override;
-    void measure () override;
+    Box (float x1, float x2, float y1, float y2, float z1, float z2);
     
     void setFaceColor (int face, Color color);
     void setColor (Color color);
@@ -28,14 +22,6 @@ public:
     #define RIGHT 3
     #define BOTTOM 4
     #define REAR 5
-
-    // colors array need to be defined as class attribute
-    // so that it can be changed after initialization.
-    GLfloat *buffer;
-    GLfloat *colors;
-    GLuint vaoID, vboID, cboID;
-    GLint BUFFER_LENGTH = 108;
-    GLint BUFFER_SIZE = 108 * sizeof (GLfloat*);
 };
 
 #endif // COMPUTER_GRAPHICS_BOX_HPP

@@ -7,7 +7,7 @@
 class Cone : public Pyramid {
 public:
     Cone ();
-    Cone (GLfloat x, GLfloat y, GLfloat z, GLfloat r, GLfloat height, bool shuffleColor = false);
+    Cone (float x, float y, float z, float r, float height);
 };
 
 #endif // COMPUTER_GRAPHICS_CONE_HPP

@@ -1,42 +1,33 @@
 #ifndef COMPUTER_GRAPHICS_PRISM_HPP
 #define COMPUTER_GRAPHICS_PRISM_HPP
 
-#include <customs/base/Color.hpp>
 #include <customs/base/Object.hpp>
+#include <customs/base/Color.hpp>
 
 using namespace glm;
 
 class Prism : public Object {
 public:
     Prism ();
-    Prism (GLfloat x, GLfloat y, GLfloat z, int n, GLfloat size, GLfloat height, bool shuffleColor = false);
+    Prism (float x, float y, float z, int n, float size, float height);
     
-    void render () override;
-    void clean () override;
-    void transform (mat4 T, int type) override;
-    void measure () override;
-    
-    Prism *setBaseColor (int slice, Color color);
-    Prism *setBaseColor (Color color);
-    Prism *setCoverColor (int slice, Color color);
-    Prism *setCoverColor (Color color);
-    Prism *setSideColor (int slice, Color color);
-    Prism *setSideColor (Color color);
-    Prism *setColor (int slice, Color color);
-    Prism *setRainbowColor ();
+    void setBaseColor (int slice, Color color);
+    void setBaseColor (Color color);
+    void setCoverColor (int slice, Color color);
+    void setCoverColor (Color color);
+    void setSideColor (int slice, Color color);
+    void setSideColor (Color color);
+    void setColor (int slice, Color color);
+    void setColor (Color color);
+    void setRainbowColor ();
     
 protected:
-    Prism (GLfloat x, GLfloat y, GLfloat z, int n, GLfloat baseSize, GLfloat coverSize, GLfloat height, bool shuffleColor = false);
+    Prism (float x, float y, float z, int n, float baseSize, float coverSize, float height);
 
 private:
-    GLuint coveraoID, coverboID, covercboID;
-    GLuint baseaoID, baseboID, basecboID;
-    GLuint sideaoID, sideboID, sidecboID;
-    
-    GLfloat *cover, *base, *side;
-    GLfloat *coverColor, *baseColor, *sideColor;
-    GLint slice;
-    GLint EDGE_LENGTH, EDGE_SIZE, SIDE_LENGTH, SIDE_SIZE;
+    float *cover, *base, *side;
+    float *coverColor, *baseColor, *sideColor;
+    int slice;
 };
 
 #endif // COMPUTER_GRAPHICS_PRISM_HPP

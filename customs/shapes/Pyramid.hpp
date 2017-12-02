@@ -7,7 +7,7 @@
 class Pyramid : public Prism {
 public:
     Pyramid ();
-    Pyramid (GLfloat x, GLfloat y, GLfloat z, int n, GLfloat size, GLfloat height, bool shuffleColor = false);
+    Pyramid (float x, float y, float z, int n, float size, float height);
 };
 
 #endif // COMPUTER_GRAPHICS_PYRAMID_HPP

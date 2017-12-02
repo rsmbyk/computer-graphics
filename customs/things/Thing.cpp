@@ -1,33 +1,27 @@
-#include <cstdio>
 #include "Thing.hpp"
-
-// TODO: calculate ComplexObjectMargin
-Thing::Thing () : Object (0, 0, 0, 0, 0, 0) {}
 
 void Thing::add (Object *object) {
     objects.push_back (object);
 }
 
-void Thing::render () {
+void Thing::onRender () {
     for (Object *obj : objects)
-        obj->render ();
+        obj->onRender ();
 }
 
-void Thing::clean () {
+void Thing::onClean () {
     for (Object *obj : objects)
-        obj->clean ();
+        obj->onClean ();
 }
 
-void Thing::transform (mat4 T, int type) {
+void Thing::onTransform (mat4 T) {
     for (Object *obj : objects)
-        obj->_transform (T, type);
+        obj->transform (T);
 }
 
-void Thing::measure () {
-    for (Object *obj : objects) {
+void Thing::onMeasureMargin () {
+    for (Object *obj : objects)
         for (int i = 0; i < 3; i++) {
-            margin[i][0] = std::min (margin[i][0], obj->margin[i][0]);
-            margin[i][1] = std::max (margin[i][1], obj->margin[i][1]);
-        }
-    }
+            margin[0][i] = std::min (margin[0][i], obj->margin[0][i]);
+            margin[1][i] = std::max (margin[1][i], obj->margin[1][i]); }
 }

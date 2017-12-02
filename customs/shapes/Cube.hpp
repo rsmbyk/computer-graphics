@@ -7,7 +7,7 @@
 class Cube : public Box {
 public:
     Cube ();
-    Cube (GLfloat x, GLfloat y, GLfloat z, GLfloat size, bool shuffleColor = false);
+    Cube (float x, float y, float z, float size);
 };
 
 #endif // COMPUTER_GRAPHICS_CUBE_HPP

@@ -56,7 +56,7 @@ set (BASE_OPENGL
     opengl.cpp
 )
 
-file (GLOB_RECURSE OPENGL_OBJECTS "customs/*")
+file (GLOB_RECURSE OPENGL_OBJECTS "customs/*" grafkom.hpp)
 
 # Test
 add_executable (Test check_version.cpp)

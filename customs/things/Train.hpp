@@ -8,7 +8,7 @@ using namespace std;
 
 class Train : public Thing {
 public:
-    Train (GLfloat x, GLfloat y, GLfloat z, int length, GLfloat carSize);
+    Train (float x, float y, float z, int length, float carSize);
 
 private:
     vector<Car*> cars;

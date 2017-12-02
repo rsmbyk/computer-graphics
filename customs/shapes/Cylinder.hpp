@@ -7,7 +7,7 @@
 class Cylinder : public Prism {
 public:
     Cylinder ();
-    Cylinder (GLfloat x, GLfloat y, GLfloat z, GLfloat r, GLfloat height, bool shuffleColor = false);
+    Cylinder (float x, float y, float z, float r, float height);
 };
 
 #endif // COMPUTER_GRAPHICS_CYLINDER_HPP

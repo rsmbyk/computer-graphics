@@ -5,8 +5,7 @@
 
 class Plane : public Box {
 public:
-    Plane ();
-    Plane (float x, float y, float z, float size);
+    Plane (float groundLevel, float groundSize);
 };
 
 #endif // COMPUTER_GRAPHICS_PLANE_HPP

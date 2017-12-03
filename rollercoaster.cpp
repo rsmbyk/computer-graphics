@@ -2,10 +2,12 @@
 #include <glfw3.h>
 #include <cstdlib>
 #include <ctime>
+#include <customs/base/Object.hpp>
 #include <vector>
 #include <common/controls.hpp>
 #include <common/shader.hpp>
 #include <grafkom.hpp>
+#include <customs/utils/pathway.hpp>
 
 using namespace std;
 
@@ -84,29 +86,46 @@ int main () {
     // define all the objects here.
     vector<Object*> objects;
     
+    float groundLevel = -0.25f;
+    float groundSize = 100;
+    
     // earth
-    objects.push_back (new Plane (0, -0.25f, 0, 50));
-
+    objects.push_back (new Plane (groundLevel, groundSize));
+    
+    // sun
+    objects.push_back (new Sun (groundLevel, groundSize));
+    
+    // railway paths
+    vector<vec3> paths;
+    buildPathFromFile ("paths.txt", paths);
+    
+    // rails
+    int rr = objects.size ();
+    buildRailway (paths, objects);
+    Object objects1 = *objects[rr];
+    
     // rail
-    auto *rail = new Box (-25, 25, -0.25f, 0, -1, 1);
-    for (int i = 0; i < 6; i++)
-        rail->setFaceColor (i, {64, 64, 64});
-    rail->setFaceColor (TOP, {80, 80, 80});
-    objects.push_back ((Object*) rail);
+    Box rail (-25, 25, groundLevel, groundLevel+0.25f, -1, 1);
+    rail.setColor ({64, 64, 64});
+    rail.setFaceColor (TOP, {80, 80, 80});
+    objects.push_back (&rail);
     
     Box box (-15, -10, 0, 0.25f, -0.5f, 0.5f);
     objects.push_back (&box);
     
-    generateRandomTree (50, -0.25f, 50.0f, objects);
+    generateRandomTree (50, groundLevel, groundSize, objects);
     Cube cube (-5, 2, 0, 4);
     Prism prism (10, 2, -10, 6, 20, 2);
     Cone cone (8, -6, 0, 2, 4);
     Pyramid pyramid (2, 5, 0, 4, 2, 4);
     Cylinder cylinder (-20, 20, 20, 1.75, 4);
-    Sphere sphere (0, 5, 0, 3);
+    Sphere sphere (0, 5, 0, 1);
+    Sphere sphere2 (0, 5, 0, 1);
+    Sphere sphere3 (0, 5, 0, 1);
+    Sphere sphere4 (0, 5, 0, 1);
     
     Tree tree (0, -0.8f, 0, 4);
-
+    
     objects.push_back (&cube);
     objects.push_back (&cone);
     objects.push_back (&pyramid);
@@ -114,24 +133,69 @@ int main () {
     objects.push_back (&prism);
     objects.push_back (&tree);
     objects.push_back (&sphere);
-    objects.push_back (new Sun (0, 100));
+    objects.push_back (&sphere2);
+    objects.push_back (&sphere3);
+    objects.push_back (&sphere4);
     
     // axis
-    objects.push_back (new Box (-100, 100, -0.01f, 0.01f, -0.01f, 0.01f));
-    objects.push_back (new Box (-0.01f, 0.01f, -100, 100, -0.01f, 0.01f));
-    objects.push_back (new Box (-0.01f, 0.01f, -0.01f, 0.01f, -100, 100));
+    Box x (-100, 100, -0.01f, 0.01f, -0.01f, 0.01f);
+    Box w (-100, 100, -0.01f, 0.01f, -2.10f, 0);
+    Box y (-0.01f, 0.01f, -100, 100, -0.01f, 0.01f);
+    Box z (-0.01f, 0.01f, -0.01f, 0.01f, -100, 100);
+    x.setColor ({0, 0, 0});
+    y.setColor ({0, 0, 0});
+    z.setColor ({0, 0, 0});
+    w.setColor ({0, 0, 0});
+    objects.push_back (&w);
+    objects.push_back (&x);
+    objects.push_back (&y);
+    objects.push_back (&z);
     
 //    objects.push_back (new Train (0, 0, 0, 4, 3.5));
     
     for (auto object : objects)
         object->render ();
     
+    int i = 0;
+    int j = paths.size () / 4 - 1;
+    int k = paths.size () / 2 - 1;
+    int l = paths.size () * 3 / 4 - 1;
+    printVec (objects1.center);
+    printVec (paths[0]);
+    printVec (paths[1]);
+    
     while (glfwGetKey (window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose (window) == 0) {
+//        printf ("--\n");
+//        printVec (sphere.center);
+//        printVec (paths[i]);
+//        printf ("%lf\n", length (sphere.center - paths[i]));
+//        objects1.orbit ({0, 1, 0}, paths[0]);
+        if (sphere.translateToIdle)
+            i = (i + 1) % paths.size ();
+        
+        if (sphere2.translateToIdle)
+            j = (j + paths.size () - 1) % paths.size ();
+    
+        if (sphere3.translateToIdle)
+            k = (k + 1) % paths.size ();
+    
+        if (sphere4.translateToIdle)
+            l = (l + paths.size () - 1) % paths.size ();
+//        printf (":\n");
+//        printf ("%f\n", sphere.translateToDist);
+//        printVec (sphere.center);
+//        printVec (sphere.translateToTarget);
+        sphere.translateTo (paths[i], 16);
+//        sphere2.translate ({-0.000001*100, -0.000001*100, -0.000001*100});
+        sphere2.translateTo (paths[j], 16);
+        sphere3.translateTo (paths[k], 16);
+        sphere4.translateTo (paths[l], 16);
+//        cylinder.translateTo ({0, 0, 0}, 4);
         box.rotateAt ({0, 0, 5}, {1, 0, 0.5});
         cube.orbit ({1, 0, 0}, {0, 0, 0});
         cone.orbit ({-1, 0, 0}, {0, 0, 0});
         pyramid.rotate ({0, 1, 0});
-        cylinder.translateTo ({0, 0, 0}, 4);
+//        cylinder.translateTo ({0, 0, 0}, 4);
         prism.scaleBy ({-0.0005f, -0.001f, 0});
         tree.translate ({0.05f, 0, 0});
         tree.rotate ({2, 0, 0});

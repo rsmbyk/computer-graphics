@@ -19,7 +19,7 @@
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 
-#define printVec(x) for (int i = 0; i < 3; i++) printf ("%f ", (x)[i]); printf ("\n");
+#define printVec(x) for (int ii = 0; ii < 3; ii++) printf ("%.12f ", (x)[ii]); printf ("\n");
 
 using namespace glm;
 
@@ -73,7 +73,8 @@ public:
     
     // translateTo related field
     vec3 translateToTarget, translateToDiff;
-    double translateToLastTime;
+    double translateToLastTime, translateToTotalDist, translateToDist;
+    bool translateToIdle;
     
     double lastRenderTime;
     mat4 transform_matrix;

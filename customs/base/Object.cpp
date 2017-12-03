@@ -1,13 +1,16 @@
+#include "Object.hpp"
 #include <GL/glew.h>
 #include <glfw3.h>
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
 #include <customs/utils/tranform_matrix.hpp>
-#include "Object.hpp"
+#include <customs/utils/vector_operations.hpp>
+#include <cstdio>
 
 using namespace glm;
 using namespace std;
+using namespace grafkom;
 
 void Object::onInit () {
     glGenVertexArrays (1, &vaoID);
@@ -38,6 +41,7 @@ void Object::init () {
     measure ();
     lastRenderTime = translateToLastTime = glfwGetTime ();
     translateToTarget = center;
+    translateToIdle = true;
     for (int i = 0; i < 2; i++)
         for (int j = 0; j < 3; j++)
             initialMargin[i][j] = margin[i][j];
@@ -137,19 +141,33 @@ void Object::translate (vec3 v) {
 
 void Object::translateTo (vec3 to, float speed) {
     if (translateToTarget != to) {
+        translateToIdle = false;
         translateToTarget = to;
         translateToDiff = to - center;
+        translateToTotalDist = translateToDist = length (translateToDiff);
     }
     
-    if (center == translateToTarget)
+//    printf ("translateTo:\n");
+    printf ("%d\n", translateToDist <= 0.000000);
+    printf ("%d\n", translateToTarget == center);
+//    translateToDist <= 0.000000 ||
+    printf ("dist  : %.12f\n", translateToDist);
+//    printf ("amount: "); printVec (amount);
+//    printf ("dist  : "); printVec (dist);
+//    printf ("move  : "); printVec (move);
+    printf ("target: "); printVec (translateToTarget);
+    printf ("center: "); printVec (center);
+    if (translateToDist <= 0.000001 || translateToTarget == center) {
+        translateToTarget = center;
+        translateToIdle = true;
         return;
+    }
     
-    double r = sqrt (sqrt (pow (translateToDiff.x, 2) + pow (translateToDiff.z, 2)) + pow (translateToDiff.y, 2));
     double currentTime = glfwGetTime ();
     double time = currentTime - translateToLastTime;
     translateToLastTime = currentTime;
     
-    auto totalTime =  (float) (r) / speed;
+    auto totalTime =  (float) (translateToTotalDist) / speed;
     auto total = (float) (time) / totalTime;
     
     vec3 amount = translateToDiff * total;
@@ -165,6 +183,13 @@ void Object::translateTo (vec3 to, float speed) {
     if (fabsf (amount.z) < fabsf (dist.z)) move.z = amount.z;
     else move.z = dist.z;
     
+//    printf ("dist  : %f\n", translateToDist);
+    printf ("amount: "); printVec (amount);
+    printf ("dist  : "); printVec (dist);
+    printf ("move  : "); printVec (move);
+//    printf ("target: "); printVec (translateToTarget);
+    printf ("center: "); printVec (center);
+    translateToDist -= length (move);
     translate (move);
 }
 

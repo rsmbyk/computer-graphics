@@ -1,3 +1,16 @@
+## How to run
+
+``` text
+Contact me :)
+```
+
+## Documentations
+
+``` text
+No time to create docs.
+Inspect the parameters and read the inline comments :D.
+```
+
 ## References and Tutorials
 
 ###### Base Source Code (including opengl libraries like glfw, glew, glm, etc.)
@@ -24,4 +37,21 @@
 - [3D Game Engine Programming - Understanding Quaternions](https://3dgep.com/understanding-quaternions)
 - [opengl.org (my reasons why to use quaternions instead of euler angles)](https://opengl.org/discussion_boards/showthread.php/140090-Rotation-around-local-axes-after-translation?p=1015646&viewfull=1#post1015646)
 
-###### All rights reserved.
+## License
+
+``` text
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+                    Version 3, December 2017
+
+ Copyright (C) 2017 Ronald Sumbayak <ronaldsumbayak611@gmail.com>
+ All rights reserved.
+
+ Everyone is permitted to copy and distribute verbatim or modified
+ copies of this license document, and changing it is allowed as long
+ as the name is changed.
+
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+  0. You just DO WHAT THE FUCK YOU WANT TO.
+```

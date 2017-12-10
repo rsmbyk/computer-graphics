@@ -14,7 +14,7 @@ public:
 private:
     // pick any reasonable size of θ and ϕ
     // for number of spherical coordinates
-    int N1 = 15, N2 = 15;
+    int N1 = 45, N2 = 15;
 };
 
 #endif // COMPUTER_GRAPHICS_BALL_HPP

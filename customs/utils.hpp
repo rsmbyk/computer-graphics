@@ -2,7 +2,7 @@
 #define COMPUTER_GRAPHICS_UTILS_HPP
 
 #include <customs/utils/BezierCurve.hpp>
-#include <customs/utils/tranform_matrix.hpp>
-#include <customs/utils/vector_operations.hpp>
+#include <customs/utils/pathway.hpp>
+#include <customs/utils/utils.hpp>
 
 #endif // COMPUTER_GRAPHICS_UTILS_HPP

@@ -6,6 +6,6 @@ Sun::Sun (float groundLevel, float groundSize) : Sphere (0, groundLevel+(groundS
 }
 
 void Sun::onRender () {
-    orbit ({0, 0, -0.1f}, vec3 ());
+    rotate ({0, 0, -0.1f}, vec3 ());
     Sphere::onRender ();
 }

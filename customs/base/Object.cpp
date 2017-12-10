@@ -1,15 +1,12 @@
-#include "Object.hpp"
-#include <GL/glew.h>
+#include <glew.h>
 #include <glfw3.h>
-#include <algorithm>
-#include <cfloat>
-#include <cmath>
-#include <customs/utils/tranform_matrix.hpp>
-#include <customs/utils/vector_operations.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/vec3.hpp>
+#include <customs/utils/utils.hpp>
 #include <cstdio>
+#include "Object.hpp"
 
 using namespace glm;
-using namespace std;
 using namespace grafkom;
 
 void Object::onInit () {
@@ -39,9 +36,8 @@ void Object::onInit () {
 void Object::init () {
     onInit ();
     measure ();
-    lastRenderTime = translateToLastTime = glfwGetTime ();
-    translateToTarget = center;
-    translateToIdle = true;
+    lastRenderTime = glfwGetTime ();
+    
     for (int i = 0; i < 2; i++)
         for (int j = 0; j < 3; j++)
             initialMargin[i][j] = margin[i][j];
@@ -52,8 +48,8 @@ void Object::init () {
 void Object::onMeasureMargin () {
     for (int i = 0; i < BUFFER_LENGTH; i += 3)
         for (int j = 0; j < 3; j++) {
-            margin[0][j] = min (margin[0][j], buffer[i+j]);
-            margin[1][j] = max (margin[1][j], buffer[i+j]); }
+            margin[0][j] = std::min (margin[0][j], buffer[i+j]);
+            margin[1][j] = std::max (margin[1][j], buffer[i+j]); }
 }
 
 void Object::measureMargin () {
@@ -129,7 +125,7 @@ void Object::onTransform (mat4 T) {
 }
 
 void Object::transform (mat4 T) {
-    transform_matrix = transform_matrix * T;
+    transform_matrix *= T;
     onTransform (T);
     measure ();
 }
@@ -139,81 +135,75 @@ void Object::translate (vec3 v) {
     transform (translation_matrix (v));
 }
 
-void Object::translateTo (vec3 to, float speed) {
-    if (translateToTarget != to) {
-        translateToIdle = false;
-        translateToTarget = to;
-        translateToDiff = to - center;
-        translateToTotalDist = translateToDist = length (translateToDiff);
-    }
-    
-//    printf ("translateTo:\n");
-    printf ("%d\n", translateToDist <= 0.000000);
-    printf ("%d\n", translateToTarget == center);
-//    translateToDist <= 0.000000 ||
-    printf ("dist  : %.12f\n", translateToDist);
-//    printf ("amount: "); printVec (amount);
-//    printf ("dist  : "); printVec (dist);
-//    printf ("move  : "); printVec (move);
-    printf ("target: "); printVec (translateToTarget);
-    printf ("center: "); printVec (center);
-    if (translateToDist <= 0.000001 || translateToTarget == center) {
-        translateToTarget = center;
-        translateToIdle = true;
-        return;
-    }
-    
-    double currentTime = glfwGetTime ();
-    double time = currentTime - translateToLastTime;
-    translateToLastTime = currentTime;
-    
-    auto totalTime =  (float) (translateToTotalDist) / speed;
-    auto total = (float) (time) / totalTime;
-    
-    vec3 amount = translateToDiff * total;
-    vec3 dist = to - center;
-    vec3 move;
-    
-    if (fabsf (amount.x) < fabsf (dist.x)) move.x = amount.x;
-    else move.x = dist.x;
-    
-    if (fabsf (amount.y) < fabsf (dist.y)) move.y = amount.y;
-    else move.y = dist.y;
-    
-    if (fabsf (amount.z) < fabsf (dist.z)) move.z = amount.z;
-    else move.z = dist.z;
-    
-//    printf ("dist  : %f\n", translateToDist);
-    printf ("amount: "); printVec (amount);
-    printf ("dist  : "); printVec (dist);
-    printf ("move  : "); printVec (move);
-//    printf ("target: "); printVec (translateToTarget);
-    printf ("center: "); printVec (center);
-    translateToDist -= length (move);
-    translate (move);
+void Object::translateTo (vec3 to, vec3 shift) {
+    translateTo (to - (shift - center));
 }
 
-void Object::orbit (vec3 angle, vec3 orbitCenter) {
-    mat4 T0, R, Tb;
-    T0 = translation_matrix (-orbitCenter);
-    R  = rotation_matrix (angle);
-    Tb = translation_matrix (orbitCenter);
-    rotationAngle += angle;
-    transform (T0 * R * Tb);
+void Object::translateTo (vec3 to) {
+    translate (to - center);
 }
 
-void Object::rotateAt (vec3 angle, vec3 centerOfRotation) {
-    vec3 coordinate = getCoordinate (centerOfRotation);
-    vec4 orbitCenter = vec4 (coordinate, 1) * transform_matrix;
-    orbit (angle, vec3 (orbitCenter.x, orbitCenter.y, orbitCenter.z));
+void Object::rotate (quat rotation, vec3 centerOfRotation) {
+    rotationQuat *= rotation;
+    mat4 T0, R, Tb, wlr;
+    T0 = translation_matrix (-centerOfRotation);
+    R  = toMat4 (rotation);
+    Tb = translation_matrix (centerOfRotation);
+    wlr = toMat4 (inverse (walkLastRotate));
+    transform (wlr * T0 * R * Tb * toMat4 (walkLastRotate));
+}
+
+void Object::rotateAt (quat rotation, vec3 pivot) {
+    rotate (rotation, getPivot (pivot));
+}
+
+void Object::rotate (quat rotation) {
+    rotate (rotation, center);
+}
+
+void Object::rotate (vec3 angle, vec3 centerOfRotation) {
+    rotate (quat (toRadian (angle)), centerOfRotation);
+}
+
+void Object::rotateAt (vec3 angle, vec3 pivot) {
+    rotate (angle, getPivot (pivot));
 }
 
 void Object::rotate (vec3 angle) {
-    orbit (angle, center);
+    rotate (angle, center);
 }
 
-void Object::scale (vec3 ratio, vec3 scalingCenter) {
-    scaleRatio += ratio;
+void Object::rotateTo (quat rotation, vec3 centerOfRotation) {
+    rotateReset ();
+    rotate (rotation, centerOfRotation);
+}
+
+void Object::rotateToAt (quat rotation, vec3 pivot) {
+    rotateTo (rotation, getPivot (pivot));
+}
+
+void Object::rotateTo (quat rotation) {
+    rotateTo (rotation, center);
+}
+
+void Object::rotateTo (vec3 angle, vec3 centerOfRotation) {
+    rotateTo (quat (toRadian (angle)), centerOfRotation);
+}
+
+void Object::rotateToAt (vec3 angle, vec3 pivot) {
+    rotateTo (angle, getPivot (pivot));
+}
+
+void Object::rotateTo (vec3 angle) {
+    rotateTo (angle, center);
+}
+
+void Object::rotateReset () {
+    rotate (inverse (rotationQuat));
+}
+
+void Object::scaleTo (vec3 ratio, vec3 scalingCenter) {
+    scaleRatio *= ratio;
     mat4 T0, S, Tb;
     T0 = translation_matrix (-scalingCenter);
     S  = scaling_matrix (ratio);
@@ -221,27 +211,102 @@ void Object::scale (vec3 ratio, vec3 scalingCenter) {
     transform (T0 * S * Tb);
 }
 
-void Object::scaleToAt (vec3 ratio, vec3 scalingCenter) {
-    scale (ratio, getCoordinate (scalingCenter));
-}
-
-void Object::scaleAt (vec3 ratio, vec3 scalingCenter) {
-    scaleToAt (ratio + 1.0f, scalingCenter);
+void Object::scaleToAt (vec3 ratio, vec3 pivot) {
+    scaleTo (ratio, getPivot (pivot));
 }
 
 void Object::scaleTo (vec3 ratio) {
+    scaleTo (ratio, center);
+}
+
+void Object::scale (vec3 ratio, vec3 scalingCenter) {
+    scaleTo (ratio + 1.0f, scalingCenter);
+}
+
+void Object::scaleAt (vec3 ratio, vec3 pivot) {
+    scale (ratio, getPivot (pivot));
+}
+
+void Object::scale (vec3 ratio) {
     scale (ratio, center);
 }
 
-void Object::scaleBy (vec3 ratio) {
-    scaleTo (ratio + 1.0f);
+vec3 Object::getInitialPivot (vec3 pivot) {
+    for (int i = 0; i < 3; i++)
+        if (pivot[i] < 0 || pivot[i] > 1)
+            return center;
+    
+    vec3 *m = initialMargin;
+    vec3 coord;
+    for (int i = 0; i < 3; i++)
+        coord[i] = m[0][i] + (m[1][i] - m[0][i]) * pivot[i];
+    return coord;
 }
 
-vec3 Object::getCoordinate (vec3 centralCoordinates) {
-    vec3 coordinate;
-    coordinate.x = initialMargin[0][X] + (initialMargin[1][X] - initialMargin[0][X]) * centralCoordinates.x;
-    coordinate.y = initialMargin[0][Y] + (initialMargin[1][Y] - initialMargin[0][Y]) * centralCoordinates.y;
-    coordinate.z = initialMargin[0][Z] + (initialMargin[1][Z] - initialMargin[0][Z]) * centralCoordinates.z;
-    return coordinate;
+vec3 Object::getPivot (vec3 pivot) {
+    vec4 p (vec4 (getInitialPivot (pivot), 1) * transform_matrix);
+    return vec3 (p.x, p.y, p.z);
 }
 
+void Object::setWalkPath (vector<vec3> path, vec3 pivot, float speed) {
+    walkPath = path;
+    walkPivot = pivot;
+    walkSpeed = speed;
+    walkProgress = 1;
+    translateTo (*walkPath.begin ());
+    walkLastTime = glfwGetTime ();
+    walkLastRotate = quat (toRadian (angleVector (*walkPath.end (), *walkPath.begin ())));
+    rotate (walkLastRotate);
+}
+
+void Object::setWalkPath (vector<vec3> path, float speed) {
+    setWalkPath (path, vec3 (0.5f, 0.5f, 0.5f), speed);
+}
+
+void Object::walk () {
+    if (walkPath.empty ())
+        return;
+    
+    double currentTime = glfwGetTime ();
+    double deltaTime = currentTime - walkLastTime;
+    
+    double amount = deltaTime * walkSpeed;
+    onWalk (amount, deltaTime);
+    walkLastTime = glfwGetTime ();
+}
+
+void Object::onWalk (double amount, double deltaTime) {
+    vec3 to = center;
+    
+    while (amount > 0.0 && deltaTime > 0.0) {
+        vec3 next = walkPath[walkProgress] + center - getPivot (walkPivot);
+        vec3 dist = next - to;
+        float len = vecLength (dist);
+        
+        if (len <= amount) {
+            deltaTime -= len / amount;
+            amount -= len;
+            to = next;
+            
+            int nextIndex = (walkProgress + 1) % walkPath.size ();
+            while (walkPath[walkProgress] == walkPath[nextIndex]) {
+                walkProgress = nextIndex;
+                nextIndex = (nextIndex + 1) % walkPath.size ();
+            }
+            
+            rotate (inverse (walkLastRotate));
+            walkLastRotate = quat (toRadian (angleVector (walkPath[walkProgress], walkPath[nextIndex])));
+            rotate (walkLastRotate);
+            walkProgress = nextIndex;
+        }
+        else {
+            double timeRequired = len / walkSpeed;
+            double timeLeft = deltaTime / timeRequired;
+            vec3 move = dist * (float) timeLeft;
+            to = to + move;
+            break;
+        }
+    }
+    
+    translateTo (to);
+}

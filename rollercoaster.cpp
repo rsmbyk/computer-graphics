@@ -1,15 +1,21 @@
-#include <GL/glew.h>
+#include <glew.h>
 #include <glfw3.h>
 #include <cstdlib>
 #include <ctime>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <customs/base/Object.hpp>
-#include <vector>
 #include <common/controls.hpp>
 #include <common/shader.hpp>
-#include <grafkom.hpp>
+#include <customs/utils/utils.hpp>
 #include <customs/utils/pathway.hpp>
+#include <cstdio>
+#include <grafkom.hpp>
+#include <map>
 
 using namespace std;
+using namespace grafkom;
 
 GLFWwindow* window;
 
@@ -70,12 +76,55 @@ int initGL (const char windowTitle[]) {
     glClearColor (150/255.0f, 207/255.0f, 234/255.0f, 0);
     
     glEnable (GL_DEPTH_TEST);
-    glDepthFunc (GL_LESS);
+    glDepthFunc (GL_GEQUAL);
     glEnable (GL_CULL_FACE);
     return 0;
 }
 
-int main () {
+void printMat42 (mat4 m) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++)
+            printf ("%.12f ", m[i][j]);
+        printf ("\n");
+    }
+}
+
+int main (int argc, char **argv) {
+//    printf ("atan (1): %f\n", atan (1));
+//    printf ("atan (1): %f\n", toDegree (atan (1)));
+//    printf ("atan (1): %f\n", toRadian (atan (1)));
+//    printf ("--");
+//    printVec3 (angleVector (vec3 {0, 0, 0}, vec3 (2, 0, 4)));
+//    printf ("--");
+//    double rad = M_PI / 180.0;
+//    vec3 v0 ({0, 0, 0});
+//    vec3 v1 ({0, 90*rad, 0});
+//    vec3 v2 ({45*rad, 0, 0*rad});
+//    quat q0 (v0);
+//    quat q1 = quat (v1) * quat (v2);
+//    quat q2 = quat (v2);
+//    printVec4 (quat (v1));
+//    printVec4 (quat (v2));
+//    printVec4 (q0);
+//    printVec4 (q1);
+//    printVec4 (q2);
+//    mat4 m0 = toMat4 (q0);
+//    mat4 m1 = toMat4 (q1);
+//    mat4 m2 = toMat4 (q2);
+//    printf ("\n");
+//    printMat42 (toMat4 (q0)); printf ("\n");
+//    printMat42 (toMat4 (q1)); printf ("\n");
+//    printMat42 (toMat4 (q2)); printf ("\n");
+//
+//    vec4 p (3, 0, 0, 1);
+//    printVec4 (p * m0);
+//    printVec4 (p * m1);
+//    printVec4 (p * m2);
+//
+//    printVec4 ((p * m0) * toMat4 (inverse (q0)));
+//
+//    return 0;
+    printf ("\n");
     srand (static_cast <unsigned> (time (0))); // NOLINT
     if (initGL ("RollerCoaster") == -1)
         return -1;
@@ -90,117 +139,95 @@ int main () {
     float groundSize = 100;
     
     // earth
-    objects.push_back (new Plane (groundLevel, groundSize));
+    Plane earth (groundLevel, groundSize);
+    objects.push_back (&earth);
     
     // sun
-    objects.push_back (new Sun (groundLevel, groundSize));
+    Sun sun (groundLevel, groundSize);
+    objects.push_back (&sun);
     
     // railway paths
+    vector<vec3> controlPoints;
     vector<vec3> paths;
-    buildPathFromFile ("paths.txt", paths);
+    buildPathFromFile ("paths.txt", paths, controlPoints);
     
     // rails
-    int rr = objects.size ();
     buildRailway (paths, objects);
-    Object objects1 = *objects[rr];
     
-    // rail
-    Box rail (-25, 25, groundLevel, groundLevel+0.25f, -1, 1);
-    rail.setColor ({64, 64, 64});
-    rail.setFaceColor (TOP, {80, 80, 80});
-    objects.push_back (&rail);
+    // print control points defined
+    for (vec3 path : controlPoints)
+        objects.push_back (new Cube (path.x, path.y-0.25f, path.z, 0.5f));
     
-    Box box (-15, -10, 0, 0.25f, -0.5f, 0.5f);
-    objects.push_back (&box);
+    // train
+    Train train (0, 0, 0, 4, 10);
+    objects.push_back (&train);
     
+    // trees
     generateRandomTree (50, groundLevel, groundSize, objects);
-    Cube cube (-5, 2, 0, 4);
-    Prism prism (10, 2, -10, 6, 20, 2);
-    Cone cone (8, -6, 0, 2, 4);
-    Pyramid pyramid (2, 5, 0, 4, 2, 4);
-    Cylinder cylinder (-20, 20, 20, 1.75, 4);
-    Sphere sphere (0, 5, 0, 1);
-    Sphere sphere2 (0, 5, 0, 1);
-    Sphere sphere3 (0, 5, 0, 1);
-    Sphere sphere4 (0, 5, 0, 1);
     
-    Tree tree (0, -0.8f, 0, 4);
+    Box box (-16, -8, 3.75f, 4.25f, -2, 2);
+    Cube cube (-12, 7, 0, 2.5f);
+    Cone cone (5, 5, 0, 1, 3);
+    cone.rotateAt ({0, 0, -90}, {0.5f, 0, 0.5f});
+    Pyramid pyramid (7, 0, 7, 5, 2, 4);
+    Sphere sphere (7, 14, 7, 10);
+    Sphere matahari (10, 10, -10, 2);
+    Sphere bumi (5, 10, -10, 1);
+    Sphere bulan (3, 10, -10, 0.5f);
+    Tree tree (0, 0, 0, 5);
+    Car car (0, 0, 0, 2);
     
+    objects.push_back (&box);
     objects.push_back (&cube);
     objects.push_back (&cone);
+    objects.push_back (&matahari);
+    objects.push_back (&bumi);
+    objects.push_back (&bulan);
     objects.push_back (&pyramid);
-    objects.push_back (&cylinder);
-    objects.push_back (&prism);
-    objects.push_back (&tree);
     objects.push_back (&sphere);
-    objects.push_back (&sphere2);
-    objects.push_back (&sphere3);
-    objects.push_back (&sphere4);
+    objects.push_back (&tree);
+    objects.push_back (&car);
+//    objects.push_back (&cone);
+//    objects.push_back (&cylinder);
+//    objects.push_back (&prism);
+//    objects.push_back (&tree);
+//    objects.push_back (&sphere2);
+//    objects.push_back (&sphere3);
+//    objects.push_back (&sphere4);
     
-    // axis
+    // axes
     Box x (-100, 100, -0.01f, 0.01f, -0.01f, 0.01f);
-    Box w (-100, 100, -0.01f, 0.01f, -2.10f, 0);
     Box y (-0.01f, 0.01f, -100, 100, -0.01f, 0.01f);
     Box z (-0.01f, 0.01f, -0.01f, 0.01f, -100, 100);
     x.setColor ({0, 0, 0});
     y.setColor ({0, 0, 0});
     z.setColor ({0, 0, 0});
-    w.setColor ({0, 0, 0});
-    objects.push_back (&w);
     objects.push_back (&x);
     objects.push_back (&y);
     objects.push_back (&z);
     
-//    objects.push_back (new Train (0, 0, 0, 4, 3.5));
-    
     for (auto object : objects)
         object->render ();
     
-    int i = 0;
-    int j = paths.size () / 4 - 1;
-    int k = paths.size () / 2 - 1;
-    int l = paths.size () * 3 / 4 - 1;
-    printVec (objects1.center);
-    printVec (paths[0]);
-    printVec (paths[1]);
+    train.setWalkPath (paths, 16);
+    tree.setWalkPath (paths, {0.5f, 0, 0.5f}, 16);
+    car.setWalkPath (paths, {0.5f, 0, 0.5f}, 16);
     
     while (glfwGetKey (window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose (window) == 0) {
-//        printf ("--\n");
-//        printVec (sphere.center);
-//        printVec (paths[i]);
-//        printf ("%lf\n", length (sphere.center - paths[i]));
-//        objects1.orbit ({0, 1, 0}, paths[0]);
-        if (sphere.translateToIdle)
-            i = (i + 1) % paths.size ();
         
-        if (sphere2.translateToIdle)
-            j = (j + paths.size () - 1) % paths.size ();
-    
-        if (sphere3.translateToIdle)
-            k = (k + 1) % paths.size ();
-    
-        if (sphere4.translateToIdle)
-            l = (l + paths.size () - 1) % paths.size ();
-//        printf (":\n");
-//        printf ("%f\n", sphere.translateToDist);
-//        printVec (sphere.center);
-//        printVec (sphere.translateToTarget);
-        sphere.translateTo (paths[i], 16);
-//        sphere2.translate ({-0.000001*100, -0.000001*100, -0.000001*100});
-        sphere2.translateTo (paths[j], 16);
-        sphere3.translateTo (paths[k], 16);
-        sphere4.translateTo (paths[l], 16);
-//        cylinder.translateTo ({0, 0, 0}, 4);
-        box.rotateAt ({0, 0, 5}, {1, 0, 0.5});
-        cube.orbit ({1, 0, 0}, {0, 0, 0});
-        cone.orbit ({-1, 0, 0}, {0, 0, 0});
-        pyramid.rotate ({0, 1, 0});
-//        cylinder.translateTo ({0, 0, 0}, 4);
-        prism.scaleBy ({-0.0005f, -0.001f, 0});
-        tree.translate ({0.05f, 0, 0});
-        tree.rotate ({2, 0, 0});
+        box.rotate ({0, 1, 0});
+        cube.rotate ({0.75f, 0, 0}, {0, 0, 0});
+        cone.rotate ({0, 0.5f, 0}, {0, 0, 0});
+        vec3 bumiPrevPos = bumi.center;
+        bumi.rotate ({0, 1/6.0, 0}, matahari.center);
+        bulan.rotate ({0, 2, 0}, bumiPrevPos);
+        bulan.translateTo (bumi.center, bumiPrevPos);
+        sphere.scaleAt (vec3 (-0.004f), {0.5f, 0, 0.5f});
+        train.walk ();
+        tree.walk ();
+        car.walk ();
+        
         glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
         glUseProgram (programID);
         
         // Compute the MVP matrix from keyboard and mouse input
@@ -219,8 +246,9 @@ int main () {
         glfwPollEvents ();
     }
     
-    for (int i = 0; i < objects.size (); i++)
-        objects[i]->onClean ();
+    for (auto object : objects)
+        object->clean ();
+    
     glDeleteProgram (programID);
     
     // Close OpenGL window and terminate GLFW

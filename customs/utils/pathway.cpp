@@ -1,18 +1,16 @@
 #include "pathway.hpp"
 #include "BezierCurve.hpp"
-#include <cstdlib>
+#include "utils.hpp"
 #include <fstream>
 #include <sstream>
 #include <queue>
-#include <customs/utils/vector_operations.hpp>
-#include <customs/base/Object.hpp>
 #include <customs/shapes/Box.hpp>
 
 using namespace glm;
 using namespace std;
 using namespace grafkom;
 
-void buildPathFromFile (const char * path_list_filename, vector<vec3> &paths) {
+void buildPathFromFile (const char * path_list_filename, vector<vec3> &paths, vector<vec3> &controlPoints) {
     ifstream file;
     file.open (path_list_filename);
     
@@ -26,6 +24,7 @@ void buildPathFromFile (const char * path_list_filename, vector<vec3> &paths) {
         stringstream ss (line);
         ss >> x >> y >> z >> o;
         vec3 p (x, y, z);
+        controlPoints.push_back (p);
         
         if (o == -2)
             pendingCP.push (0.9);
@@ -56,38 +55,20 @@ void buildPathFromFile (const char * path_list_filename, vector<vec3> &paths) {
     bezier.build (paths);
 }
 
-
 void buildRailway (vector<vec3> &paths, vector<Object*> &objects) {
     for (int i = 0; i < paths.size ()-1; i++) {
-        vec3 p0, p1;
-        p0 = paths[i];
-        p1 = paths[i+1];
-        float x1, x2, y1, y2, z1, z2;
-        float r = (float) length (p1 - p0);
-        x1 = p0.x - r;
-        x2 = p0.x;
-        y1 = p0.y - 0.1f;
-        y2 = p0.y + 0.1f;
-        z1 = p0.z - 0.5f;
-        z2 = p0.z + 0.5f;
-        
-        if (p1.x > p0.x)
-            x1 += r, x2 += r;
-    
+        vec3 p0 = paths[i];
+        vec3 p1 = paths[i+1];
         vec3 angle = angleVector (p0, p1);
-    
-        Box *box = new Box (x1, x2, y1, y2, z1, z2);
-        box->setColor ({64, 64, 64});
-        box->setFaceColor (TOP, {80, 80, 80});
-        box->orbit (angle, p0);
-//        if (i == 0 || i == 1) {
-//            printf ("angle:\n");
-//            printVec (angle);
-//            if (i == 0)
-//                box->orbit ({0, 0, angle.z}, p0);
-//            if (i == 1)
-//                box->orbit ({0, angle.y, 0}, p0);
-//        }
-        objects.push_back ((Object*) box);
+        
+//        if (p1.x > p0.x)
+//            x1 += r, x2 += r;
+        
+        auto *rail = new Box (0, vecLength (p1 - p0), -0.1f, 0.1f, -0.5f, 0.5f);
+        rail->setColor ({64, 64, 64});
+        rail->setFaceColor (TOP, {80, 80, 80});
+        rail->translate (p0);
+        rail->rotate (angle, p0);
+        objects.push_back (rail);
     }
 }

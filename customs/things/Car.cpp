@@ -13,10 +13,10 @@ Car::Car (float x, float y, float z, float size) {
 
     windows.push_back (new Box (x-(ms*1.25f), x+(ms*1.25f), y+(ms*0.75f), y+(ms*3.25f), z+(ms*2), z+(ms*2)+0.05f));
     windows.push_back (new Box (x-(ms*1.25f), x+(ms*1.25f), y+(ms*0.75f), y+(ms*3.25f), z-(ms*2)-0.05f, z-(ms*2)));
-    for (int i = 0; i < windows.size (); i++) {
+    for (auto &window : windows) {
         for (int j = 0; j < 6; j++)
-            windows[i]->setFaceColor (j, {200, 200, 200});
-        windows[i]->setFaceColor (FRONT, {255, 255, 255});
+            window->setFaceColor (j, {200, 200, 200});
+        window->setFaceColor (FRONT, {255, 255, 255});
     }
     
     add (&box);

@@ -21,7 +21,7 @@ private:
     
     vector<vec3> anchorPoints;
     map<int, vector<vec3> > controlPoints;
-    int flatness = 25;
+    int flatness = 15;
 };
 
 #endif // COMPUTER_GRAPHICS_CURVE_HPP

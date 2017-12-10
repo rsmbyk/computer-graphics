@@ -16,22 +16,33 @@
  *   to make sure it is measured properly.
  */
 
+#include <glm/gtc/quaternion.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
+#include <vector>
+#include <cfloat>
 
-#define printVec(x) for (int ii = 0; ii < 3; ii++) printf ("%.12f ", (x)[ii]); printf ("\n");
+#define printVec(vv,nn) for (int ii = 0; ii < (nn); ii++) printf ("%.12f ", (vv)[ii]); printf ("\n");
+#define printVec3(vv) printVec ((vv), 3)
+#define printVec4(vv) printVec ((vv), 4)
+#define printMat(mm,nn) for (int iii = 0; iii < (nn); iii++) { printVec4 ((mm)[iii]); }
+#define printMat4(mm) printMat ((mm), 4)
 
 using namespace glm;
+using namespace std;
 
 // TODO: try to use VBO indexing for better performance and experience.
 
 class Object {
 public:
+    // overridable methods
     virtual void onInit ();
     virtual void onRender ();
     virtual void onClean ();
     virtual void onMeasureMargin ();
     virtual void onTransform (mat4 T);
+    
+    // base methods
     void init ();
     void render ();
     void updateBuffer ();
@@ -40,17 +51,46 @@ public:
     void measureCenter ();
     void measureMargin ();
     void transform (mat4 T);
-    void translate (vec3 v);
-    void translateTo (vec3 to, float speed);
-    void orbit (vec3 angle, vec3 orbitCenter);
-    void rotateAt (vec3 angle, vec3 centerOfRotation);
+    
+    // translation-related methods
+    void translate (vec3 amount);
+    void translateTo (vec3 to, vec3 shift);
+    void translateTo (vec3 to);
+    
+    // rotation-related methods
+    void rotateToAt (quat rotation, vec3 pivot);
+    void rotateToAt (vec3 angle, vec3 pivot);
+    void rotateTo (quat rotation, vec3 centerOfRotation);
+    void rotateTo (quat rotation);
+    void rotateTo (vec3 angle, vec3 centerOfRotation);
+    void rotateTo (vec3 angle);
+    void rotateAt (quat rotation, vec3 pivot);
+    void rotateAt (vec3 angle, vec3 pivot);
+    void rotate (quat rotation, vec3 centerOfRotation);
+    void rotate (quat rotation);
+    void rotate (vec3 angle, vec3 centerOfRotation);
     void rotate (vec3 angle);
-    void scale (vec3 ratio, vec3 scalingCenter);
-    void scaleToAt (vec3 ratio, vec3 scalingCenter);
-    void scaleAt (vec3 ratio, vec3 scalingCenter);
+    void rotateReset ();
+    
+    // scaling-related methods
+    void scaleToAt (vec3 ratio, vec3 pivot);
+    void scaleTo (vec3 ratio, vec3 scalingCenter);
     void scaleTo (vec3 ratio);
-    void scaleBy (vec3 ratio);
-    vec3 getCoordinate (vec3 coordinates);
+    void scaleAt (vec3 ratio, vec3 pivot);
+    void scale (vec3 ratio, vec3 scalingCenter);
+    void scale (vec3 ratio);
+    
+    // pivot-related methods
+    vec3 getInitialPivot (vec3 pivot);
+    vec3 getPivot (vec3 pivot);
+    
+    // path-related methods
+    virtual void setWalkPath (vector<vec3> path, vec3 pivot, float speed);
+    virtual void setWalkPath (vector<vec3> path, float speed);
+    void walk ();
+    virtual void onWalk (double amount, double deltaTime = DBL_MAX);
+    
+    // TODO: lower unnecessary public fields to private or protected.
     
     // axis constants
     // static const int X=0, Y=1, Z=2;
@@ -71,14 +111,18 @@ public:
     unsigned int vaoID, vboID, cboID;
     int BUFFER_LENGTH, BUFFER_SIZE, TRIANGLE_COUNT;
     
-    // translateTo related field
-    vec3 translateToTarget, translateToDiff;
-    double translateToLastTime, translateToTotalDist, translateToDist;
-    bool translateToIdle;
+    // walk related field
+    vector<vec3> walkPath;
+    vec3 walkPivot;
+    double walkLastTime;
+    quat walkLastRotate;
+    float walkSpeed;
+    int walkProgress;
     
     double lastRenderTime;
     mat4 transform_matrix;
-    vec3 rotationAngle, translationDistance, scaleRatio;
+    quat rotationQuat;
+    vec3 translationDistance, scaleRatio;
     vec3 center, initialCenter;
     vec3 margin[2], initialMargin[2];
     float x, y, z;

@@ -1,12 +1,12 @@
 #include "BezierCurve.hpp"
-#include "vector_operations.hpp"
+#include "utils.hpp"
 #include <customs/base/Object.hpp>
 
 using namespace std;
 using namespace grafkom;
 
 void BezierCurve::setFlatness (int f) {
-    this->flatness = max (0, min (100, f));
+    this->flatness = std::max (0, std::min (100, f));
 }
 
 void BezierCurve::addAnchorPoint (vec3 ap) {

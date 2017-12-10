@@ -1,7 +1,7 @@
 ## References and Tutorials
 
 ###### Base Source Code (including opengl libraries like glfw, glew, glm, etc.)
-- [opengl-tutorial - ogl](https://github.com/opengl-tutorials/ogl)
+- [opengl-tutorials - ogl](https://github.com/opengl-tutorials/ogl)
 
 ###### Modern Opengl
 - [opengl-tutorial.org](http://opengl-tutorial.org)

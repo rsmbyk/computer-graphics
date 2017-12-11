@@ -6,8 +6,8 @@
 //#include <glfw3.h>
 //#include <common/controls.hpp>
 //#include <common/shader.hpp>
-//#include <customs/shapes.hpp>
-//#include <customs/utils/tranform_matrix.hpp>
+//#include <custom/shapes.hpp>
+//#include <custom/utils/tranform_matrix.hpp>
 //#include <glm/gtx/rotate_vector.hpp>
 //
 //GLFWwindow* window;

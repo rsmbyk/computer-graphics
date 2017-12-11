@@ -5,11 +5,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <customs/base/Object.hpp>
+#include <custom/base/Object.hpp>
 #include <common/controls.hpp>
 #include <common/shader.hpp>
-#include <customs/utils/utils.hpp>
-#include <customs/utils/pathway.hpp>
+#include <custom/utils/utils.hpp>
+#include <custom/utils/pathway.hpp>
 #include <cstdio>
 #include <grafkom.hpp>
 #include <map>
@@ -129,7 +129,7 @@ int main (int argc, char **argv) {
     if (initGL ("RollerCoaster") == -1)
         return -1;
     
-    GLuint programID = LoadShaders ("TransformVertexShader.vertexshader", "ColorFragmentShader.fragmentshader");
+    GLuint programID = LoadShaders ("shader/TransformVertexShader.vertexshader", "shader/ColorFragmentShader.fragmentshader");
     GLint MatrixID = glGetUniformLocation (programID, "MVP");
     
     // define all the objects here.

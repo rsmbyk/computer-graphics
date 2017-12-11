@@ -1,7 +1,7 @@
 #ifndef COMPUTER_GRAPHICS_PLANE_HPP
 #define COMPUTER_GRAPHICS_PLANE_HPP
 
-#include "customs/shapes/Box.hpp"
+#include "custom/shapes/Box.hpp"
 
 class Plane : public Box {
 public:

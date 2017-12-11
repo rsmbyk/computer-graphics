@@ -1,8 +1,8 @@
 #ifndef COMPUTER_GRAPHICS_TREE_HPP
 #define COMPUTER_GRAPHICS_TREE_HPP
 
-#include <customs/shapes/Cylinder.hpp>
-#include <customs/shapes/Cone.hpp>
+#include <custom/shapes/Cylinder.hpp>
+#include <custom/shapes/Cone.hpp>
 #include "Thing.hpp"
 
 class Tree : public Thing {

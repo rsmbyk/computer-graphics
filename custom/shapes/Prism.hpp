@@ -1,8 +1,8 @@
 #ifndef COMPUTER_GRAPHICS_PRISM_HPP
 #define COMPUTER_GRAPHICS_PRISM_HPP
 
-#include <customs/base/Object.hpp>
-#include <customs/base/Color.hpp>
+#include <custom/base/Object.hpp>
+#include <custom/base/Color.hpp>
 
 using namespace glm;
 

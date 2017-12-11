@@ -2,7 +2,7 @@
 #include <glfw3.h>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/vec3.hpp>
-#include <customs/utils/utils.hpp>
+#include <custom/utils/utils.hpp>
 #include <cstdio>
 #include "Object.hpp"
 

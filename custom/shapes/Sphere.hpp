@@ -1,8 +1,8 @@
 #ifndef COMPUTER_GRAPHICS_BALL_HPP
 #define COMPUTER_GRAPHICS_BALL_HPP
 
-#include <customs/base/Object.hpp>
-#include <customs/base/Color.hpp>
+#include <custom/base/Object.hpp>
+#include <custom/base/Color.hpp>
 
 class Sphere : public Object {
 public:

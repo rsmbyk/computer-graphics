@@ -1,7 +1,7 @@
 #ifndef COMPUTER_GRAPHICS_COMPLEXOBJECT_HPP
 #define COMPUTER_GRAPHICS_COMPLEXOBJECT_HPP
 
-#include <customs/base/Object.hpp>
+#include <custom/base/Object.hpp>
 #include <vector>
 
 using namespace glm;

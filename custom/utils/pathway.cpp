@@ -4,7 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <queue>
-#include <customs/shapes/Box.hpp>
+#include <custom/shapes/Box.hpp>
 
 using namespace glm;
 using namespace std;

@@ -1,7 +1,7 @@
 #ifndef COMPUTER_GRAPHICS_SUN_HPP
 #define COMPUTER_GRAPHICS_SUN_HPP
 
-#include "customs/things/Thing.hpp"
+#include "custom/things/Thing.hpp"
 
 class Sun : public Sphere {
 public:

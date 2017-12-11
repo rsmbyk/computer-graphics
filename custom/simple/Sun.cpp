@@ -1,4 +1,4 @@
-#include <customs/shapes/Sphere.hpp>
+#include <custom/shapes/Sphere.hpp>
 #include "Sun.hpp"
 
 Sun::Sun (float groundLevel, float groundSize) : Sphere (0, groundLevel+(groundSize/2)+5, 0, 1.5) {

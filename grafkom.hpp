@@ -1,9 +1,9 @@
 #ifndef COMPUTER_GRAPHICS_GRAFKOM_HPP
 #define COMPUTER_GRAPHICS_GRAFKOM_HPP
 
-#include <customs/shapes.hpp>
-#include <customs/simple.hpp>
-#include <customs/things.hpp>
-#include <customs/utils.hpp>
+#include <custom/shapes.hpp>
+#include <custom/simple.hpp>
+#include <custom/things.hpp>
+#include <custom/utils.hpp>
 
 #endif // COMPUTER_GRAPHICS_GRAFKOM_HPP

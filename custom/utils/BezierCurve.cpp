@@ -1,6 +1,6 @@
 #include "BezierCurve.hpp"
 #include "utils.hpp"
-#include <customs/base/Object.hpp>
+#include <custom/base/Object.hpp>
 
 using namespace std;
 using namespace grafkom;

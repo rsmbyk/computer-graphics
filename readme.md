@@ -21,7 +21,7 @@ Inspect the parameters and read the inline comments :D.
 - [glfw / glfw](https://github.com/glfw/glfw)
 - [g-truc / glm](https://github.com/g-truc/glm)
 
-###### Modern Opengl
+###### Modern OpenGL
 - [opengl-tutorial.org](http://opengl-tutorial.org)
 - [learnopengl.com](https://learnopengl.com)
 - [open.gl](https://open.gl)

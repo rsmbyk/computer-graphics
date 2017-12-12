@@ -13,8 +13,13 @@ Inspect the parameters and read the inline comments :D.
 
 ## References and Tutorials
 
-###### Base Source Code (including opengl libraries like glfw, glew, glm, etc.)
-- [opengl-tutorials - ogl](https://github.com/opengl-tutorials/ogl)
+###### Base Source Code (including opengl libraries like glew, glfw, glm, etc.)
+- [opengl-tutorials / ogl](https://github.com/opengl-tutorials/ogl)
+
+###### Libraries
+- [nigels-com / glew](https://github.com/nigels-com/glew)
+- [glfw / glfw](https://github.com/glfw/glfw)
+- [g-truc / glm](https://github.com/g-truc/glm)
 
 ###### Modern Opengl
 - [opengl-tutorial.org](http://opengl-tutorial.org)

@@ -11,9 +11,6 @@
  * + All objects has empty constructor which will create
  *   the object in the center of the map (x=0, y=0, z=0)
  *   (in front of initial camera position).
- *
- * + Do not forget to call init at the end of constructor
- *   to make sure it is measured properly.
  */
 
 #include <glm/gtc/quaternion.hpp>
@@ -35,6 +32,8 @@ using namespace std;
 
 class Object {
 public:
+    Object ();
+    
     // overridable methods
     virtual void onInit ();
     virtual void onRender ();
@@ -85,10 +84,13 @@ public:
     vec3 getPivot (vec3 pivot);
     
     // path-related methods
-    virtual void setWalkPath (vector<vec3> path, vec3 pivot, float speed);
-    virtual void setWalkPath (vector<vec3> path, float speed);
+    void setWalkPath (vector<vec3> path, vec3 pivot, float speed);
+    void setWalkPath (vector<vec3> path, float speed);
+    virtual void onSetWalkPath ();
+    vec3 getWalkPoint (int i);
     void walk ();
-    virtual void onWalk (double amount, double deltaTime = DBL_MAX);
+    void setWalkProgress (int progress);
+    virtual void onWalk (double amount);
     
     // TODO: lower unnecessary public fields to private or protected.
     
@@ -115,9 +117,8 @@ public:
     vector<vec3> walkPath;
     vec3 walkPivot;
     double walkLastTime;
-    quat walkLastRotate;
     float walkSpeed;
-    int walkProgress;
+    int walkProgress, walkNext;
     
     double lastRenderTime;
     mat4 transform_matrix;

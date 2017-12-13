@@ -1,14 +1,29 @@
 ## How to run
 
-``` text
+```text
 Contact me :)
 ```
 
 ## Documentations
 
-``` text
+```text
 No time to create docs.
 Inspect the parameters and read the inline comments :D.
+```
+
+## Controls
+```text
+w - move forward
+s - move backward
+a - strafe left
+d - strafe right
+e - move up
+c - move down
+1 - toggle axes
+2 - toggle control points
+3 - toggle rails
+up - increase train speed
+down - decrease train speed
 ```
 
 ## References and Tutorials

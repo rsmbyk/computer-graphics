@@ -10,7 +10,7 @@ using namespace glm;
 using namespace std;
 using namespace grafkom;
 
-void buildPathFromFile (const char * path_list_filename, vector<vec3> &paths, vector<vec3> &controlPoints) {
+void buildPathFromFile (const char *path_list_filename, vector<vec3> &paths, vector<vec3> &controlPoints) {
     ifstream file;
     file.open (path_list_filename);
     
@@ -61,10 +61,7 @@ void buildRailway (vector<vec3> &paths, vector<Object*> &objects) {
         vec3 p1 = paths[i+1];
         vec3 angle = angleVector (p0, p1);
         
-//        if (p1.x > p0.x)
-//            x1 += r, x2 += r;
-        
-        auto *rail = new Box (0, vecLength (p1 - p0), -0.1f, 0.1f, -0.5f, 0.5f);
+        auto rail = new Box (0, vecLength (p1 - p0), -0.1f, 0, -0.5f, 0.5f);
         rail->setColor ({64, 64, 64});
         rail->setFaceColor (TOP, {80, 80, 80});
         rail->translate (p0);

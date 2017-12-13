@@ -9,6 +9,13 @@
 using namespace glm;
 using namespace grafkom;
 
+Object::Object () {
+    TRIANGLE_COUNT = 1;
+    BUFFER_LENGTH = TRIANGLE_COUNT * 3;
+    BUFFER_SIZE = BUFFER_LENGTH * sizeof (float*);
+    buffer = new float[BUFFER_LENGTH];
+}
+
 void Object::onInit () {
     glGenVertexArrays (1, &vaoID);
     glBindVertexArray (vaoID);
@@ -149,8 +156,7 @@ void Object::rotate (quat rotation, vec3 centerOfRotation) {
     T0 = translation_matrix (-centerOfRotation);
     R  = toMat4 (rotation);
     Tb = translation_matrix (centerOfRotation);
-    wlr = toMat4 (inverse (walkLastRotate));
-    transform (wlr * T0 * R * Tb * toMat4 (walkLastRotate));
+    transform (T0 * R * Tb);
 }
 
 void Object::rotateAt (quat rotation, vec3 pivot) {
@@ -249,18 +255,27 @@ vec3 Object::getPivot (vec3 pivot) {
 }
 
 void Object::setWalkPath (vector<vec3> path, vec3 pivot, float speed) {
-    walkPath = path;
+    walkPath = std::move (path);
     walkPivot = pivot;
     walkSpeed = speed;
-    walkProgress = 1;
-    translateTo (*walkPath.begin ());
+    onSetWalkPath ();
     walkLastTime = glfwGetTime ();
-    walkLastRotate = quat (toRadian (angleVector (*walkPath.end (), *walkPath.begin ())));
-    rotate (walkLastRotate);
 }
 
 void Object::setWalkPath (vector<vec3> path, float speed) {
-    setWalkPath (path, vec3 (0.5f, 0.5f, 0.5f), speed);
+    setWalkPath (std::move (path), vec3 (0.5f, 0.5f, 0.5f), speed);
+}
+
+/***
+ * this method invoked after object has been positioned in first
+ * control point and is looking towards second control point.
+ */
+void Object::onSetWalkPath () {
+    setWalkProgress (0);
+}
+
+vec3 Object::getWalkPoint (int i) {
+    return walkPath[i] + center - getPivot (walkPivot);
 }
 
 void Object::walk () {
@@ -269,41 +284,48 @@ void Object::walk () {
     
     double currentTime = glfwGetTime ();
     double deltaTime = currentTime - walkLastTime;
+    walkLastTime = glfwGetTime ();
     
     double amount = deltaTime * walkSpeed;
-    onWalk (amount, deltaTime);
-    walkLastTime = glfwGetTime ();
+    onWalk (amount);
 }
 
-void Object::onWalk (double amount, double deltaTime) {
+void Object::setWalkProgress (int progress) {
+    if (progress >= walkPath.size ())
+        return;
+
+    walkProgress = progress;
+    walkNext = (walkProgress + 1) % walkPath.size ();
+    
+    translateTo (getWalkPoint (walkProgress));
+    rotate (inverse (rotationQuat));
+    vec3 angle = angleVector (getWalkPoint (walkProgress), getWalkPoint (walkNext));
+    rotate (quat (toRadian (angle)));
+}
+
+void Object::onWalk (double amount) {
     vec3 to = center;
     
-    while (amount > 0.0 && deltaTime > 0.0) {
-        vec3 next = walkPath[walkProgress] + center - getPivot (walkPivot);
-        vec3 dist = next - to;
-        float len = vecLength (dist);
+    while (amount > 0.0) {
+        vec3 next = getWalkPoint (walkNext);
+        float len = vecLength (next - to);
         
         if (len <= amount) {
-            deltaTime -= len / amount;
+            do {
+                walkProgress = walkNext;
+                walkNext = (walkNext + 1) % walkPath.size ();
+            }
+            while (walkPath[walkProgress] == walkPath[walkNext]);
+    
             amount -= len;
             to = next;
-            
-            int nextIndex = (walkProgress + 1) % walkPath.size ();
-            while (walkPath[walkProgress] == walkPath[nextIndex]) {
-                walkProgress = nextIndex;
-                nextIndex = (nextIndex + 1) % walkPath.size ();
-            }
-            
-            rotate (inverse (walkLastRotate));
-            walkLastRotate = quat (toRadian (angleVector (walkPath[walkProgress], walkPath[nextIndex])));
-            rotate (walkLastRotate);
-            walkProgress = nextIndex;
+            setWalkProgress (walkProgress);
         }
         else {
-            double timeRequired = len / walkSpeed;
-            double timeLeft = deltaTime / timeRequired;
-            vec3 move = dist * (float) timeLeft;
-            to = to + move;
+            // u: unit vector
+            vec3 v = next - to;
+            vec3 u = v / vecLength (v);
+            to = to + (u * float (amount));
             break;
         }
     }

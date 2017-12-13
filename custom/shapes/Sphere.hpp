@@ -8,13 +8,12 @@ class Sphere : public Object {
 public:
     Sphere ();
     Sphere (float x, float y, float z, float r);
-    
     void setColor (Color color);
 
 private:
     // pick any reasonable size of θ and ϕ
     // for number of spherical coordinates
-    int N1 = 45, N2 = 15;
+    int N1 = 30, N2 = 15;
 };
 
 #endif // COMPUTER_GRAPHICS_BALL_HPP

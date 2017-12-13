@@ -2,6 +2,7 @@
 #define COMPUTER_GRAPHICS_TRAIN_HPP
 
 #include <custom/shapes/Cylinder.hpp>
+#include "Locomotive.hpp"
 #include "Car.hpp"
 
 using namespace std;
@@ -9,16 +10,19 @@ using namespace std;
 class Train : public Thing {
 public:
     Train (float x, float y, float z, int length, float carSize);
-    void setWalkPath (vector<vec3> path, vec3 pivot, float speed) override;
-    void setWalkPath (vector<vec3> path, float speed) override;
-    void onWalk (double amount, double deltaTime = DBL_MAX) override;
-
-private:
-    float carSize;
-    vector<Car*> cars;
-    vector<Object*> locomotives;
-    Cylinder *chimney;
+    void onSetWalkPath () override;
+    void setWalkProgress (int progress);
+    void onWalk (double amount) override;
     
+    constexpr static float
+        L = 0.25f,
+        H = 0.1f,
+        W = 0.1f;
+    
+private:
+    Locomotive *locomotive;
+    vector<Car*> cars;
+    float carSize;
 };
 
 #endif // COMPUTER_GRAPHICS_TRAIN_HPP

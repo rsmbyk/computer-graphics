@@ -8,11 +8,10 @@
 class Car : public Thing {
 public:
     Car (float x, float y, float z, float size);
-    static constexpr float multiplier = 0.1f;
 
 private:
-    Box box, connector;
-    std::vector<Box*> windows {};
+    Box *box;
+    std::vector<Box*> windows;
 };
 
 #endif // COMPUTER_GRAPHICS_CAR_HPP

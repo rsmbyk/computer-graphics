@@ -11,6 +11,7 @@
 #include <custom/utils/utils.hpp>
 #include <custom/utils/pathway.hpp>
 #include <cstdio>
+#include <algorithm>
 #include <grafkom.hpp>
 #include <map>
 
@@ -46,14 +47,18 @@ int initGL (const char windowTitle[]) {
     if (!glfwInit ())
         return -1;
     
-    glfwWindowHint (GLFW_SAMPLES, 4);
+    glfwWindowHint (GLFW_SAMPLES, 8);
     glfwWindowHint (GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint (GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint (GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint (GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint (GLFW_REFRESH_RATE, 60);
     
-    // Open a window and create its OpenGL context
-    window = glfwCreateWindow (800, 600, windowTitle, nullptr, nullptr);
+    // Open a window in full screen mode
+    GLFWmonitor *monitor = glfwGetPrimaryMonitor ();
+    const GLFWvidmode* mode = glfwGetVideoMode (monitor);
+    window = glfwCreateWindow (mode->width, mode->height, windowTitle, monitor, nullptr);
+    glfwSetWindowAspectRatio (window, 1366, 768);
     
     if (window == nullptr) {
         glfwTerminate ();
@@ -72,59 +77,16 @@ int initGL (const char windowTitle[]) {
     glfwSetInputMode (window, GLFW_STICKY_KEYS, GL_TRUE);
     glfwSetInputMode (window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwPollEvents ();
-    glfwSetCursorPos (window, 1024/2, 768/2);
+    glfwSetCursorPos (window, 1366/2, 768/2);
     glClearColor (150/255.0f, 207/255.0f, 234/255.0f, 0);
     
     glEnable (GL_DEPTH_TEST);
-    glDepthFunc (GL_GEQUAL);
+    glDepthFunc (GL_LESS);
     glEnable (GL_CULL_FACE);
     return 0;
 }
 
-void printMat42 (mat4 m) {
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++)
-            printf ("%.12f ", m[i][j]);
-        printf ("\n");
-    }
-}
-
 int main (int argc, char **argv) {
-//    printf ("atan (1): %f\n", atan (1));
-//    printf ("atan (1): %f\n", toDegree (atan (1)));
-//    printf ("atan (1): %f\n", toRadian (atan (1)));
-//    printf ("--");
-//    printVec3 (angleVector (vec3 {0, 0, 0}, vec3 (2, 0, 4)));
-//    printf ("--");
-//    double rad = M_PI / 180.0;
-//    vec3 v0 ({0, 0, 0});
-//    vec3 v1 ({0, 90*rad, 0});
-//    vec3 v2 ({45*rad, 0, 0*rad});
-//    quat q0 (v0);
-//    quat q1 = quat (v1) * quat (v2);
-//    quat q2 = quat (v2);
-//    printVec4 (quat (v1));
-//    printVec4 (quat (v2));
-//    printVec4 (q0);
-//    printVec4 (q1);
-//    printVec4 (q2);
-//    mat4 m0 = toMat4 (q0);
-//    mat4 m1 = toMat4 (q1);
-//    mat4 m2 = toMat4 (q2);
-//    printf ("\n");
-//    printMat42 (toMat4 (q0)); printf ("\n");
-//    printMat42 (toMat4 (q1)); printf ("\n");
-//    printMat42 (toMat4 (q2)); printf ("\n");
-//
-//    vec4 p (3, 0, 0, 1);
-//    printVec4 (p * m0);
-//    printVec4 (p * m1);
-//    printVec4 (p * m2);
-//
-//    printVec4 ((p * m0) * toMat4 (inverse (q0)));
-//
-//    return 0;
-    printf ("\n");
     srand (static_cast <unsigned> (time (0))); // NOLINT
     if (initGL ("RollerCoaster") == -1)
         return -1;
@@ -149,22 +111,45 @@ int main (int argc, char **argv) {
     // railway paths
     vector<vec3> controlPoints;
     vector<vec3> paths;
-    buildPathFromFile ("paths.txt", paths, controlPoints);
+    buildPathFromFile ("paths2.txt", paths, controlPoints);
     
     // rails
-    buildRailway (paths, objects);
+    vector<Object*> rails;
+    buildRailway (paths, rails);
     
     // print control points defined
+    vector<Object> cp;
     for (vec3 path : controlPoints)
-        objects.push_back (new Cube (path.x, path.y-0.25f, path.z, 0.5f));
+        cp.push_back (Cube (path.x, path.y-0.25f, path.z, 0.5f));
     
     // train
-    Train train (0, 0, 0, 4, 10);
-    objects.push_back (&train);
+    Train train1 (0, 0, 0, 8, 8);
+    objects.push_back (&train1);
+    train1.setWalkPath (paths, 8);
+    
+    Train train2 (0, 0, 0, 8, 8);
+    objects.push_back (&train2);
+    train2.setWalkPath (paths, 8);
+    train2.setWalkProgress (100);
     
     // trees
-    generateRandomTree (50, groundLevel, groundSize, objects);
+    generateRandomTree (100, groundLevel, groundSize, objects);
     
+    // axes
+    vector<Object> axes;
+    Box x (-100, 100, -0.01f, 0.01f, -0.01f, 0.01f);
+    Box y (-0.01f, 0.01f, -100, 100, -0.01f, 0.01f);
+    Box z (-0.01f, 0.01f, -0.01f, 0.01f, -100, 100);
+    x.setColor ({0, 0, 0});
+    y.setColor ({0, 0, 0});
+    z.setColor ({0, 0, 0});
+    axes.push_back (x);
+    axes.push_back (y);
+    axes.push_back (z);
+    
+    // --------------------------------------------------
+    // define all object to be used.
+    // --------------------------------------------------
     Box box (-16, -8, 3.75f, 4.25f, -2, 2);
     Cube cube (-12, 7, 0, 2.5f);
     Cone cone (5, 5, 0, 1, 3);
@@ -174,9 +159,11 @@ int main (int argc, char **argv) {
     Sphere matahari (10, 10, -10, 2);
     Sphere bumi (5, 10, -10, 1);
     Sphere bulan (3, 10, -10, 0.5f);
-    Tree tree (0, 0, 0, 5);
-    Car car (0, 0, 0, 2);
+    Car car (0, 0, 0, 10);
     
+    // --------------------------------------------------
+    // insert to 'objects' vector.
+    // --------------------------------------------------
     objects.push_back (&box);
     objects.push_back (&cube);
     objects.push_back (&cone);
@@ -185,36 +172,66 @@ int main (int argc, char **argv) {
     objects.push_back (&bulan);
     objects.push_back (&pyramid);
     objects.push_back (&sphere);
-    objects.push_back (&tree);
     objects.push_back (&car);
-//    objects.push_back (&cone);
-//    objects.push_back (&cylinder);
-//    objects.push_back (&prism);
-//    objects.push_back (&tree);
-//    objects.push_back (&sphere2);
-//    objects.push_back (&sphere3);
-//    objects.push_back (&sphere4);
     
-    // axes
-    Box x (-100, 100, -0.01f, 0.01f, -0.01f, 0.01f);
-    Box y (-0.01f, 0.01f, -100, 100, -0.01f, 0.01f);
-    Box z (-0.01f, 0.01f, -0.01f, 0.01f, -100, 100);
-    x.setColor ({0, 0, 0});
-    y.setColor ({0, 0, 0});
-    z.setColor ({0, 0, 0});
-    objects.push_back (&x);
-    objects.push_back (&y);
-    objects.push_back (&z);
+    // --------------------------------------------------
+    // set walk path
+    // --------------------------------------------------
+    car.setWalkPath (paths, {0.5f, 0, 0.5f}, 7.9f);
     
+    // --------------------------------------------------
+    // keyboard states
+    // --------------------------------------------------
+    map<int, bool> state;
+    
+    // --------------------------------------------------
+    // flags
+    // --------------------------------------------------
+    map<string, bool> flags;
+    flags["controlPoints"] = true;
+    flags["axes"] = true;
+    flags["rails"] = true;
+    
+    // --------------------------------------------------
+    // first render
+    // --------------------------------------------------
     for (auto object : objects)
         object->render ();
     
-    train.setWalkPath (paths, 16);
-    tree.setWalkPath (paths, {0.5f, 0, 0.5f}, 16);
-    car.setWalkPath (paths, {0.5f, 0, 0.5f}, 16);
-    
     while (glfwGetKey (window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose (window) == 0) {
+        if (glfwGetKey (window, GLFW_KEY_1) == GLFW_PRESS) {
+            if (!state[GLFW_KEY_1])
+                flags["axes"] = !flags["axes"];
+            state[GLFW_KEY_1] = true;
+        }
+        else state[GLFW_KEY_1] = false;
         
+        if (glfwGetKey (window, GLFW_KEY_2) == GLFW_PRESS) {
+            if (!state[GLFW_KEY_2])
+                flags["controlPoints"] = !flags["controlPoints"];
+            state[GLFW_KEY_2] = true;
+        }
+        else state[GLFW_KEY_2] = false;
+    
+        if (glfwGetKey (window, GLFW_KEY_3) == GLFW_PRESS) {
+            if (!state[GLFW_KEY_3])
+                flags["rails"] = !flags["rails"];
+            state[GLFW_KEY_3] = true;
+        }
+        else state[GLFW_KEY_3] = false;
+    
+        if (glfwGetKey (window, GLFW_KEY_UP) == GLFW_PRESS)
+            train1.walkSpeed = std::min (train1.walkSpeed+0.2f, 64.0f);
+    
+        if (glfwGetKey (window, GLFW_KEY_DOWN) == GLFW_PRESS)
+            train1.walkSpeed = std::max (train1.walkSpeed-0.4f, 0.0f);
+    
+        // --------------------------------------------------
+        // do transforms here
+        // --------------------------------------------------
+        train1.walk ();
+        train2.walk ();
+        car.walk ();
         box.rotate ({0, 1, 0});
         cube.rotate ({0.75f, 0, 0}, {0, 0, 0});
         cone.rotate ({0, 0.5f, 0}, {0, 0, 0});
@@ -223,9 +240,9 @@ int main (int argc, char **argv) {
         bulan.rotate ({0, 2, 0}, bumiPrevPos);
         bulan.translateTo (bumi.center, bumiPrevPos);
         sphere.scaleAt (vec3 (-0.004f), {0.5f, 0, 0.5f});
-        train.walk ();
-        tree.walk ();
-        car.walk ();
+        // --------------------------------------------------
+        // end
+        // --------------------------------------------------
         
         glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram (programID);
@@ -241,7 +258,20 @@ int main (int argc, char **argv) {
         for (auto object : objects)
             // render all objects defined
             object->render ();
+    
+        if (flags["axes"])
+            for (auto axis : axes)
+                axis.render ();
         
+        if (flags["controlPoints"])
+            for (auto p : cp)
+                p.render ();
+        
+        if (flags["rails"])
+            for (auto rail : rails)
+                rail->render ();
+        
+        glfwSwapInterval (1);
         glfwSwapBuffers (window);
         glfwPollEvents ();
     }

@@ -11,8 +11,8 @@ public:
     Tree (float x, float y, float z, int size);
 
 private:
-    Cylinder trunk;
-    Cone leaves;
+    Cylinder *trunk;
+    Cone *leaves;
 };
 
 #endif // COMPUTER_GRAPHICS_TREE_HPP
